@@ -32,7 +32,8 @@ begin
 	writeln('<tr>');
 	writeln('<td class="link"><a href="info">Information</a></td>');
 	writeln('<td class="link"><a href="new">Create Room</a></td>');
-	writeln('<td class="link"><a href="source">View Source</a></td>');
+	writeln('<td class="link"><a href="source.htm">',
+		'View Source</a></td>');
 	writeln('</tr>');
 	writeln('</table>');
 	writeln('</center>');
