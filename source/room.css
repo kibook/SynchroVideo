@@ -1,0 +1,32 @@
+body {
+  font-size: 14px;
+}
+td.btn {
+  text-align: center;
+}
+#playlistcount {
+  font-size:12px;
+}
+#playlistvideos {
+  border:2px solid;
+  border-color:#ccc;
+  display:inline-block;
+  width:100%;
+  height:426px;
+  overflow:auto;
+  font-size: 12px;
+  font-family: "Times New Roman", Times, serif
+}
+#chat {
+  display: inline-block;
+}
+#lock, #tvmode {
+  font-size: 12px;
+}
+#addwait, #importwait {
+  display: none;
+  color: #a10;
+}
+#description {
+  font-style: italic;
+}
