@@ -100,8 +100,6 @@ begin
 		readln(ref, tvmode);
 		close(ref);
 
-		writeln('TIME: ', time, ' || DURATION: ', duration);
-
 		delay(1000);
 		time := time + 1.00;
 
