@@ -32,6 +32,22 @@ var
 	ini         : tinifile;
 	match       : boolean;
 	priv        : boolean;
+
+procedure displayroom;
+begin
+	if not priv then
+	begin
+		write('<h3>');
+		write('<a href="../', each, '">');
+		write(roomname);
+		writeln('</a></h3>');
+		writeln('<p>', roomdesc, '</p>');
+		writeln('<p class="smalltext">',
+			'<em>Now Playing: <b>', playing, '</b></em>',
+			'</p>');
+	end
+end;
+
 begin
 	writeln('Content-Type: text/html');
 	writeln;
@@ -89,17 +105,7 @@ begin
 			 (pos(upcase(searchterms), upcase(roomtags)) > 0) or
 			 (pos(upcase(searchterms), upcase(playing))  > 0);
 		if match then
-			if not priv then
-			begin
-				write('<h3>');
-				write('<a href="../', each, '">');
-				write(roomname);
-				writeln('</a></h3>');
-				writeln('<p>', roomdesc, '</p>');
-				writeln('<p class="smalltext"><em>',
-					'Now Playing: <b>',
-					playing, '</b></em></p>');
-			end
+			displayroom
 	end;
 
 	writeln('</center>');
