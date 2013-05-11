@@ -1,6 +1,23 @@
-uses dos, htmlutils, classes, inifiles;
+uses dos, htmlutils, classes, inifiles, sysutils;
 const
 	REDIRECT = '<script>window.location="../"</script>';
+
+function checkvideo(room : string) : string;
+var
+	ini    : tinifile;
+	id     : string;
+	ref    : text;
+begin
+	assign(ref, '../' + room + '/syncvid.syn');
+	reset(ref);
+	readln(ref, id);
+	close(ref);
+
+	ini := tinifile.create('../' + room + '/playlist.ini');
+	checkvideo := ini.readstring('videos', id, '???');
+	ini.free
+end;
+
 var
 	query       : array of array of string;
 	pair        : array of string;
@@ -10,6 +27,7 @@ var
 	roomname    : string;
 	roomtags    : string;
 	roomdesc    : string;
+	playing     : string;
 	rooms       : tstringlist;
 	ini         : tinifile;
 	match       : boolean;
@@ -25,7 +43,7 @@ begin
 			'q': searchterms := html2text(pair[1])
 		end;
 
-	if searchterms = '' then
+	if trim(searchterms) = '' then
 		writeln(REDIRECT);
 	
 	ini := tinifile.create('../rooms.ini');
@@ -63,11 +81,13 @@ begin
 			roomname := readstring('room', 'name', '');
 			roomtags := readstring('room', 'tags', '');
 			roomdesc := readstring('room', 'description', '');
+			playing  := checkvideo(each);
 			free
 		end;
-		match := (pos(upcase(searchterms), upcase(each)) > 0) or
-			(pos(upcase(searchterms), upcase(roomname)) > 0) or
-			(pos(upcase(searchterms), upcase(roomtags)) > 0);
+		match := (pos(upcase(searchterms), upcase(each))     > 0) or
+			 (pos(upcase(searchterms), upcase(roomname)) > 0) or
+			 (pos(upcase(searchterms), upcase(roomtags)) > 0) or
+			 (pos(upcase(searchterms), upcase(playing))  > 0);
 		if match then
 			if not priv then
 			begin
@@ -75,9 +95,10 @@ begin
 				write('<a href="../', each, '">');
 				write(roomname);
 				writeln('</a></h3>');
-				write('<p>');
-				write(roomdesc);
-				writeln('</p>')
+				writeln('<p>', roomdesc, '</p>');
+				writeln('<p class="smalltext"><em>',
+					'Now Playing: <b>',
+					playing, '</b></em></p>');
 			end
 	end;
 
