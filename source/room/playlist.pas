@@ -355,7 +355,7 @@ end;
 
 
 var
-	query     : array of string;
+	query     : tstringarray;
 	sessionid : string;	
 	hostpass  : string;
 	locked    : boolean;

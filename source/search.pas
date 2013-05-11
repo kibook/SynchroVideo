@@ -19,8 +19,8 @@ begin
 end;
 
 var
-	query       : array of array of string;
-	pair        : array of string;
+	query       : thttpquery;
+	pair        : thttpquerypair;
 	searchterms : string = '';
 	each        : string;
 	password    : string;

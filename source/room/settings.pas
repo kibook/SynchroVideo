@@ -7,13 +7,11 @@ const
 
 var
 	ini         : tinifile;
-	query       : array of string;
-	params      : array of array of string;
-	c           : char;
+	query       : thttpquerypair;
+	params      : thttpquery;
 	tags        : string;
 	banner      : string;
 	ircconf     : string;
-	request     : string;
 	videoid     : string;
 	password    : string;
 	hostpass    : string;

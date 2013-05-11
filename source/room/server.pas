@@ -4,7 +4,7 @@ const
 	BUFFERFILE = 'syncvid.syn';
 
 var
-	query     : array of string;
+	query     : tstringarray;
 	sessionid : string;
 	synctime  : string;
 	hostpass  : string;	

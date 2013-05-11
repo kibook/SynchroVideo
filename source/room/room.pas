@@ -17,8 +17,8 @@ end;
 
 var
 	ini        : tinifile;
-	params     : array of array of string;
-	query      : array of string;
+	params     : thttpquery;
+	query      : thttpquerypair;
 	sessionkey : string;
 	sessionid  : string;
 	pagetitle  : string;
@@ -26,13 +26,11 @@ var
 	hostpass   : string;
 	roomdesc   : string;
 	videoid    : string;
-	request    : string;
 	ircconf    : string;
 	banner     : string;
 	each       : string;
 	authuser   : boolean = FALSE;
 	ishost     : boolean = FALSE;
-	c          : char;
 	ref        : text;
 	scripts    : tstringlist;
 	styles     : tstringlist;
@@ -70,6 +68,7 @@ begin
 
 	writeln('<html>');
 	writeln('<head>');
+	writeln('<meta charset="utf-8">');
 	writeln('<title>', pagetitle, '</title>');
 
 	writeln('<link rel="stylesheet" type="text/css" ',

@@ -6,10 +6,9 @@ const
 	RESERVEDNAMES : array [1..5] of string =
 		('new', 'source', 'res', 'search', 'info');
 var
-	request    : string;
-	query      : array of string;
+	query      : thttpquerypair;
 	rooms      : array of string;
-	params     : array of array of string;
+	params     : thttpquery;
 	roomdir    : string;
 	solve      : string;
 	check      : string;

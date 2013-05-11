@@ -3,13 +3,11 @@ const
 	REDIRECT = '<script type="text/javascript">setTimeout(function(){'+
 		'window.location="./";}, 2000);</script>';
 var
-	request  : string;
 	room     : string;
 	hostpass : string;
 	pass     : string;
-	query    : array of array of string;
-	pair     : array of string;
-	ch       : char;
+	query    : thttpquery;
+	pair     : thttpquerypair;
 	ini      : tinifile;
 	isauth   : boolean;
 	confirm  : boolean;

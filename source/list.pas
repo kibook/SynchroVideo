@@ -1,4 +1,5 @@
-uses classes, inifiles;
+uses classes, inifiles;	
+
 var
 	rooms : tstringlist;
 	title : string;	

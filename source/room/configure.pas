@@ -6,9 +6,7 @@ const
 
 var
 	ini      : tinifile;
-	params   : array of array of string;
-	c        : char;
-	request  : string;
+	params   : thttpquery;
 	hostpass : string;
 begin
 	writeln('Content-Type: text/html');
