@@ -157,7 +157,7 @@ begin
 	writeln('</tr></table>');
 	writeln('</form>');
 
-	writeln('<p><a href="info#create">',
+	writeln('<p><a href="info/#create">',
 		'How do I create a room?</a></p>');
 
 	writeln('</center>');
