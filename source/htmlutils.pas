@@ -28,25 +28,11 @@ function getfiletype(request : ansistring)          : string;
 function getfile    (request : ansistring)          : ansistring;
 
 implementation
-uses sysutils, strarrutils, dos;
+uses sysutils, strarrutils, dos, strutils;
 
 const
-	HTMLCODES: array [0..29] of string = (
-		'%20', #32,
-		'%2F', #47,
-		'+',   #32,
-		'%3F', #63,
-		'%2B', #43,
-		'%21', #33,
-		'%3C', #60,
-		'%3E', #62,
-		'%2C', #44,
-		'%5B', #91,
-		'%3B', #59,
-		'%5D', #93,
-		'%27', #39,
-		'%26', #38,
-		'%22', #34
+	HTMLCODES: array [0..1] of string = (
+		'+',   #32
 	);
 
 	CLEANCODES: array [0..7] of string = (
@@ -57,6 +43,52 @@ const
 		'<',  '&lt;'
 	);
 	CRLF = #13#10;
+
+function converthex(rawtext : string) : string;
+var
+	i    : integer;
+	ch   : char;
+	code : string;
+begin
+	converthex := '';
+	i := 1;
+	repeat
+		ch := rawtext[i];
+		if ch = '%' then
+		begin
+			code := concat(rawtext[i + 1], rawtext[i + 2]);
+			converthex := concat(converthex,
+				chr(hex2dec(code)));
+			inc(i, 2)
+		end
+		else
+			converthex := concat(converthex, ch);
+		inc(i)
+	until i > length(rawtext)
+end;
+
+function ansiconverthex(rawtext : ansistring) : string;
+var
+	i    : integer;
+	ch   : char;
+	code : string;
+begin
+	ansiconverthex := '';
+	i := 1;
+	repeat
+		ch := rawtext[i];
+		if ch = '%' then
+		begin
+			code := concat(rawtext[i + 1], rawtext[i + 2]);
+			ansiconverthex := concat(ansiconverthex,
+				chr(hex2dec(code)));
+			inc(i, 2)
+		end
+		else
+			ansiconverthex := concat(ansiconverthex, ch);
+		inc(i)
+	until i > length(rawtext)
+end;
 
 function replacetext(rawtext : string;
 	const list : array of string) : string;
@@ -102,12 +134,12 @@ end;
 
 function html2text(const rawtext : string) : string;
 begin
-	html2text := replacetext(rawtext, HTMLCODES)
+	html2text := replacetext(converthex(rawtext), HTMLCODES)
 end;
 
 function ansihtml2text(const rawtext : ansistring) : ansistring;
 begin
-	ansihtml2text := ansireplacetext(rawtext, HTMLCODES)
+	ansihtml2text := ansireplacetext(ansiconverthex(rawtext), HTMLCODES)
 end;
 
 function text2html(const rawtext : string) : string;
