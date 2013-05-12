@@ -1,6 +1,6 @@
 {$mode objfpc}
-uses dos, strarrutils, inifiles, httpsend, classes, strutils, math,
-	htmlutils, sysutils;
+uses dos, strarrutils, inifiles, classes, strutils, math, htmlutils,
+	sysutils, fphttpclient;
 
 const
 	YTAPIURL   = 'http://gdata.youtube.com/feeds/api/videos/';
@@ -30,17 +30,16 @@ end;
 
 function gettitle(id : string) : string;
 var
-	data    : tstringlist;
 	content : ansistring;
-	i       : ansistring;
-	a       : integer;
-	b       : integer;
+	a       : word;
+	b       : word;
 begin
-	data := tstringlist.create;
-	httpgettext(YTAPIURL + id + '?fields=title', data);
-	content := '';
-	for i in data do
-		content := content + i;
+	with tfphttpclient.create(NIL) do
+	begin
+		content := get(YTAPIURL + id + '?fields=title');
+		free
+	end;
+
 	a := pos('<title type=''text''>', content) + 19;
 	b := pos('</title>', content);
 	gettitle := text2html(copy(content, a, b - a));
@@ -51,74 +50,77 @@ const
 	tag    = 'openSearch:totalResults';
 	params = '?v=2&fields=' + tag;
 var
-	list : tstringlist;
-	each : string;
-	a    : word;
-	b    : word;
-	e    : word;
+	content : ansistring;
+	a       : word;
+	b       : word;
 begin
 	getlistsize := 50;
 
-	list := tstringlist.create;
+	with tfphttpclient.create(NIL) do
+	begin
+		content := get(YTPLAPIURL + id + params);
+		free
+	end;
 
-	httpgettext(YTPLAPIURL + id + params, list);
-	
-	for each in list do
-		if pos('<' + tag + '>', each) <> 0 then
-		begin
-			a := pos('<'  + tag + '>', each) + 25;
-			b := pos('</' + tag + '>', each);
-			val(copy(each, a, b - a), getlistsize, e);
-			if not (e = 0) then
-				halt;
-			break
-		end
+	a := pos('<'  + tag + '>', content) + 25;
+	b := pos('</' + tag + '>', content);
+	getlistsize := strtoint(copy(content, a, b - a))
 end;
 
 procedure importlist(id : string);
 const
-	params = '?v=2&prettyprint=true&max-results=50&start-index=';
+	params = '?v=2&max-results=50&start-index=';
 var
-	list     : tstringlist;
-	each     : string;
+	content  : ansistring;
 	title    : string;
 	videoid  : string;
 	index    : string;
-	requests : integer;
-	a        : integer;
-	b        : integer;
-	i        : integer;
+	requests : word;
+	a        : word;
+	b        : word;
+	i        : word;
+
+procedure parselist;
+begin
+	str((50 * i) + 1, index);
+	
+	with tfphttpclient.create(NIL) do
+	begin
+		content := get(YTPLAPIURL + id + params + index);
+		free
+	end;
+
+	a := pos('<media:title type=''plain''>', content) + 26;
+	b := pos('</media:title>', content);
+	content := copy(content, b + 13, length(content));
+
+	repeat
+		title := '';
+		a := pos('<media:title type=''plain''>',
+			content) + 26;
+		b := pos('</media:title>', content);
+		title := text2html(copy(content, a, b - a));
+		
+		content := copy(content, b + 13, length(content));
+
+		videoid := '';
+		a := pos('<yt:videoid>',  content) + 12;
+		b := pos('</yt:videoid>', content);
+		videoid := copy(content, a, b - a);
+
+		content := copy(content, b + 13, length(content));
+
+		if not (title = '') and not (videoid = '') then
+			ini.writestring('videos', videoid, title)
+	until pos('<media:title type=''plain''>', content) = 0
+end;
+	
 begin
 	requests := ceil(getlistsize(id) / 50.0);
-
-	list := tstringlist.create;
 	
 	for i := 0 to requests - 1 do
 	begin
-		str((50 * i) + 1, index);
-	
-		httpgettext(YTPLAPIURL + id + params + index, list);
-
-		for each in list do
-		begin
-			videoid := '';
-			if not (pos('<media:title type=''plain''>',
-				each) = 0) then
-			begin
-				a := pos('<media:title type=''plain''>',
-					each) + 26;
-				b := pos('</media:title>', each);
-				title := copy(each, a, b - a);
-			end;
-			if not (pos('<yt:videoid>', each) = 0) then
-			begin
-				a := pos('<yt:videoid>',  each) + 12;
-				b := pos('</yt:videoid>', each);
-				videoid := copy(each, a, b - a);
-			end;
-			ini.writestring('videos', videoid,
-				text2html(title))
-		end
+		parselist;
 	end
 end;
 

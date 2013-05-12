@@ -1,28 +1,23 @@
-uses strarrutils, inifiles, classes, crt, strutils, sysutils, httpsend;
+uses strarrutils, inifiles, classes, crt, strutils, sysutils, fphttpclient;
 const
 	BUFFERFILE = 'syncvid.syn';
 	YTAPIURL   = 'http://gdata.youtube.com/feeds/api/videos/';	
 
 function getduration(id : string) : double;
 var
-	data    : tstringlist;
 	content : ansistring;
-	i       : ansistring;
-	a       : integer;
-	b       : integer;
-	e       : integer; 
+	a       : word;
+	b       : word;
 begin
-	data := tstringlist.create;
-	httpgettext(YTAPIURL + id, data);
-	content := '';
-	for i in data do
-		content := content + i;
+	with tfphttpclient.create(NIL) do
+	begin
+		content := get(YTAPIURL + id);
+		free
+	end;
 	a := pos('<yt:duration seconds=''', content) + 22;
 	content := copy(content, a, length(content));
 	b := pos('''/>', content);
-	val(copy(content, 1, b - 1), getduration, e);
-	if not (e = 0) then
-		getduration := 0;
+	getduration := strtoint(copy(content, 1, b - 1))
 end;
 
 var
@@ -37,9 +32,8 @@ var
 	tvmode     : string;
 	duration   : double;
 	time       : double;
-	index      : integer;
-	e          : integer;
-	i          : integer;
+	index      : word;
+	i          : word;
 begin
 	ini := tinifile.create('settings.ini');
 	
@@ -73,7 +67,7 @@ begin
 	readln(ref, videoid);
 	readln(ref, getstr);
 	readln(ref, getstr);
-	val(getstr, time, e);
+	time := strtoint(getstr);
 	readln(ref, tvmode);
 	close(ref);
 
@@ -94,9 +88,7 @@ begin
 		readln(ref, videoid);
 		readln(ref, getstr);
 		readln(ref, getstr);
-		val(getstr, time, e);
-		if not (e = 0) then
-			halt;
+		time := strtoint(getstr);
 		readln(ref, tvmode);
 		close(ref);
 
