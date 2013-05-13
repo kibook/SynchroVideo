@@ -1,7 +1,5 @@
 uses dos, htmlutils, inifiles, process;
-const
-	REDIRECT = '<script type="text/javascript">setTimeout(function(){'+
-		'window.location="./";}, 2000);</script>';
+
 var
 	room     : string;
 	hostpass : string;
@@ -75,12 +73,12 @@ begin
 			proc.waitonexit;
 			proc.free;
 			writeln('<h2>Room deleted!</h2>');
-			writeln(REDIRECT)
+			redirect('./', 2)
 		end
 	else begin
 		writeln('<h1>Error!</h1>');
 		writeln('<p>Unauthorized access</p>');
-		writeln(REDIRECT)
+		redirect('./', 2)
 	end;
 	
 	writeln('</center>');

@@ -3,8 +3,6 @@ uses fpwritepng, fpimage, fpcanvas, fpimgcanv, ftfont, base64,
 	inifiles, classes;
 
 const
-	REDIRECT = '<script>setTimeout(function(){window.location="./";},'+
-		'2000);</script>';
 	CAPTCHADIR = 'res/captcha/';
 	CHARS = '0123456789abcdefghijklmnopqrstuvwxyz';
 
@@ -80,7 +78,7 @@ begin
 	begin
 		writeln('<h1>Error!</h1>');
 		writeln('Room creation is disabled');
-		writeln(REDIRECT);
+		redirect('./', 2);
 		halt
 	end;
 

@@ -4,10 +4,6 @@ const
 	DEFTITLE = 'Sync Vid';
 	JSFILE   = 'room.js';
 	DEFVIDEO = 'YTu-ctARF2w';
-	REDIRECT = '<script>setTimeout(function(){window.location="'+
-		'./";}, 3000)</script>';
-	REDIRECTPASS = '<script>setTimeout(function(){window.location="'+
-		'private.cgi";}, 1000)</script>';
 
 function nameformat(const roomname : string) : string;
 begin
@@ -89,7 +85,7 @@ begin
 		else begin
 			writeln('<h1>Error!</h1>');
 			writeln('Password Invalid');
-			writeln(REDIRECT);
+			redirect('./', 3);
 			halt(0)
 		end;
 		'password': if
@@ -103,7 +99,7 @@ begin
 	begin
 		writeln('<h1>Error!</h1>');
 		writeln('Private room requires a password');
-		writeln(REDIRECTPASS);
+		redirect('private.cgi', 1);
 		halt(0)
 	end;
 	

@@ -38,6 +38,8 @@ function getfiletype(request : string)       : string;
 { get the contents of the file }
 function getfile    (request : string)       : string;
 
+procedure redirect  (url : string; time : word);
+
 implementation
 uses sysutils, strarrutils, dos, strutils;
 
@@ -154,6 +156,12 @@ begin
 	end
 	else
 		getrequest := getenv('QUERY_STRING')
+end;
+
+procedure redirect(url : string; time : word);
+begin
+	writeln('<meta http-equiv="refresh" content="',
+		time, '; url=', url, '">')
 end;
 
 end.

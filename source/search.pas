@@ -1,6 +1,4 @@
 uses dos, htmlutils, classes, inifiles, sysutils;
-const
-	REDIRECT = '<script>window.location="../"</script>';
 
 function checkvideo(room : string) : string;
 var
@@ -54,13 +52,21 @@ begin
 
 	query := getquery(getrequest);
 
-	for pair in query do
-		case pair[0] of
-			'q': searchterms := html2text(pair[1])
-		end;
+	if length(query) < 2 then
+	begin
+		redirect('../', 0);
+		halt
+	end;
+
+	for pair in query do case pair[0] of
+		'q': searchterms := html2text(pair[1])
+	end;
 
 	if trim(searchterms) = '' then
-		writeln(REDIRECT);
+	begin
+		redirect('../', 0);
+		halt
+	end;
 	
 	ini := tinifile.create('../rooms.ini');
 	rooms := tstringlist.create;

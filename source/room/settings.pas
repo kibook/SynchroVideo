@@ -2,8 +2,6 @@ uses dos, strarrutils, inifiles, htmlutils;
 const
 	DEFTITLE     = 'Sync Vid';
 	DEFVIDEO     = 'YTu-ctARF2w';
-	REDIRECT = '<script>setTimeout(function(){window.location="'+
-		'settings-auth.cgi";}, 1000)</script>';
 
 var
 	ini         : tinifile;
@@ -60,7 +58,7 @@ begin
 			else begin
 				writeln('<h1>Error!</h1>');
 				writeln('Password Invalid');
-				writeln(REDIRECT);
+				redirect('settings-auth.cgi', 1);
 				halt(0)
 			end
 		end;
@@ -69,7 +67,7 @@ begin
 	begin
 		writeln('<h1>Error!</h1>');
 		writeln('Settings page requires a password');
-		writeln(REDIRECT);
+		redirect('settings-auth.cgi', 1);
 		halt
 	end;
 

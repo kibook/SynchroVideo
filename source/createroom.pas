@@ -1,7 +1,6 @@
 uses dos, strarrutils, sysutils, inifiles, process, htmlutils;
+
 const
-	REDIRECT = '<script>setTimeout(function(){window.location="./"},'+
-		'1000);</script>';
 	CAPTCHADIR = 'res/captcha/';
 	RESERVEDNAMES : array [1..5] of string =
 		('new', 'source', 'res', 'search', 'info');
@@ -50,7 +49,7 @@ begin
 	begin
 		writeln('<h1>Error!</h1>');
 		writeln('Room creation disabled');
-		writeln(REDIRECT);
+		redirect('./', 1);
 		halt
 	end;
 	
@@ -84,7 +83,7 @@ begin
 	begin
 		writeln('<h1>Error!</h1>');
 		writeln('Captcha not solved');
-		writeln(REDIRECT);
+		redirect('./', 1);
 		halt
 	end;
 
@@ -92,7 +91,7 @@ begin
 	begin
 		writeln('<h1>Error!</h1>');
 		writeln('Password cannot be blank!');
-		writeln(REDIRECT);
+		redirect('./', 1);
 		halt
 	end;
 
@@ -117,7 +116,7 @@ begin
 	begin
 		writeln('<h1>Error!</h1>');
 		writeln('Maximum number of rooms have been created');
-		writeln(REDIRECT);
+		redirect('./', 1);
 		halt
 	end;
 
@@ -136,7 +135,7 @@ begin
 	begin
 		writeln('<h1>Error!</h1>');
 		writeln('Room already exists!');
-		writeln(REDIRECT);
+		redirect('./', 1);
 		halt
 	end;
 
@@ -144,7 +143,7 @@ begin
 	begin
 		writeln('<h1>Error!</h1>');
 		writeln('Room name must 5-12 alphanumeric characters!');
-		writeln(REDIRECT);
+		redirect('./', 1);
 		halt
 	end;
 
@@ -153,7 +152,7 @@ begin
 		begin
 			writeln('<h1>Error!</h1>');
 			writeln('Invalid room name!');
-			writeln(REDIRECT);
+			redirect('./', 1);
 			halt
 		end;
 
