@@ -209,42 +209,60 @@ begin
 		writeln('</td>');
 
 		writeln('</tr>');
-		writeln('</table>');
-		
-		writeln('&nbsp;<input type="button" ',
+	
+		writeln('<tr>');
+		writeln('<td></td>');
+		writeln('<td>');
+		writeln('<input type="button" ',
 			'value="TV Mode" ',
 			'onclick="startTvMode();">');
-		writeln('<br>');
+		writeln('</td><td>');
+		writeln('</td>');
+		writeln('</tr>');
 
+		writeln('</table>')
 	end;
 	
-	writeln('Add:&nbsp;');
-	writeln('<input type="text" id="addvideo">&nbsp;');
-	writeln('<input type="button" onclick="btnAddVideo();" ',
-		'value="Add">');
-	writeln('<br>');
-	writeln('<div id="addwait">',
-		'Adding video...</div>');
+	writeln('<table>');
+	writeln('<tr>');
+	writeln('<td>Add:</td>');
+	writeln('<td><input type="text" id="addvideo"></td>');
+	writeln('<td><input type="button" onclick="btnAddVideo();" ',
+		'value="Add"></td>');
+	writeln('</table>');
+
+	writeln('<div id="addwait">Adding video...</div>');
+
 	writeln('<br>');
 
 	if ishost then
 	begin
-		writeln('List:&nbsp;');
-		writeln('<input type="text" id="listname">&nbsp;');
-		writeln('<br>');
-		writeln('<select id="playlists" ',
-			'onchange="selectPlaylist();"');
+		writeln('<table>');
+		writeln('<tr>');
+		writeln('<td>List:</td>');
+		writeln('<td><input type="text" id="listname"></td>');
+		writeln('</tr><tr>');
+		writeln('<td></td>');
+		writeln('<td><select id="playlists" ',
+			'onchange="selectPlaylist();">');
 		writeln('<option value="">--none--</option>');
-		writeln('</select>');
-		writeln('<br>');
-		writeln('<input type="button" onclick="btnLoadList();" ',
-			'value="Load">&nbsp;');
-		writeln('<input type="button" onclick="btnSaveList();" ',
-			'value="Save">&nbsp;');
-		writeln('<input type="button" onclick="btnRemoveList();" ',
-			'value="Delete">&nbsp;');
-		writeln('<input type="button" onclick="btnImportList();" ',
-			'value="Import">');
+		writeln('</select></td>');
+		writeln('</tr>');
+		writeln('</table>');
+
+		writeln('<table>');
+		writeln('<tr>');
+		writeln('<td><input type="button" ',
+			'onclick="btnLoadList();" value="Load"></td>');
+		writeln('<td><input type="button" ',
+			'onclick="btnSaveList();" value="Save"></td>');
+		writeln('<td><input type="button" ',
+			'onclick="btnRemoveList();" value="Delete"></td>');
+		writeln('<td><input type="button" ',
+			'onclick="btnImportList();" value="Import"></td>');
+		writeln('</tr>');
+		writeln('</table>');
+
 		writeln('<div id="importwait">',
 			'Importing playlist...</div>');
 		writeln('<br>')
