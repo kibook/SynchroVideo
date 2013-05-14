@@ -64,20 +64,24 @@ var
 	code : string;
 begin
 	converthex := '';
-	i := 1;
-	repeat
-		ch := rawtext[i];
-		if ch = '%' then
-		begin
-			code := concat(rawtext[i + 1], rawtext[i + 2]);
-			converthex := concat(converthex,
-				chr(hex2dec(code)));
-			inc(i, 2)
-		end
-		else
-			converthex := concat(converthex, ch);
-		inc(i)
-	until i > length(rawtext)
+	if length(rawtext) > 0 then
+	begin
+		i := 1;
+		repeat
+			ch := rawtext[i];
+			if ch = '%' then
+			begin
+				code := concat(rawtext[i + 1],
+					rawtext[i + 2]);
+				converthex := concat(converthex,
+					chr(hex2dec(code)));
+				inc(i, 2)
+			end
+			else
+				converthex := concat(converthex, ch);
+			inc(i)
+		until i > length(rawtext)
+	end
 end;
 
 function replacetext(rawtext : string;

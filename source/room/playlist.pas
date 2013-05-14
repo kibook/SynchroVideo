@@ -383,8 +383,11 @@ begin
 
 
 	ini    := tinifile.create('playlist.ini');
-	ini.cacheupdates := TRUE;
-	locked := (ini.readstring('status', 'locked', 'true') = 'true');
+	with ini do
+	begin
+		cacheupdates := TRUE;
+		locked := (readstring('status', 'locked', 'true') = 'true')
+	end;
 
 	case length(query) of
 		1: case query[0] of
@@ -431,5 +434,6 @@ begin
 		end
 	end;
 
-	ini.updatefile
+	ini.updatefile;
+	ini.free
 end.
