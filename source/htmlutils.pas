@@ -164,8 +164,8 @@ end;
 
 procedure redirect(url : string; time : word);
 begin
-	writeln('<meta http-equiv="refresh" content="',
-		time, '; url=', url, '">')
+	writeln('<meta http-equiv="refresh" content="', time,
+		';url=', url, '">')
 end;
 
 end.

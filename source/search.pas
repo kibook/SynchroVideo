@@ -52,12 +52,6 @@ begin
 
 	query := getquery(getrequest);
 
-	if length(query) < 2 then
-	begin
-		redirect('../', 0);
-		halt
-	end;
-
 	for pair in query do case pair[0] of
 		'q': searchterms := html2text(pair[1])
 	end;

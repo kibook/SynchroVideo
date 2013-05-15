@@ -19,6 +19,7 @@ begin
 		'href="general.css">');
 	writeln('<link rel="stylesheet" type="text/css" ',
 		'href="index.css">');
+	writeln('<link rel="icon" href="res/favicon.gif">');
 	writeln('</head>');
 	writeln('<body>');
 

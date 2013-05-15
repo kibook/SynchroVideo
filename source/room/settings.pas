@@ -11,10 +11,13 @@ var
 	banner      : string;
 	ircconf     : string;
 	videoid     : string;
+	favicon     : string;
 	password    : string;
 	hostpass    : string;
 	pagetitle   : string;
 	description : string;
+	roomscript  : string;
+	roomstyle   : string;
 	roomurl     : string;
 	isauth      : boolean = FALSE;
 begin
@@ -25,15 +28,18 @@ begin
 
 	with ini do
 	begin
-		roomurl    := readstring('room', 'url',           '');
-		password   := readstring('room', 'password',      '');
-		hostpass   := readstring('room', 'host-password', '');
-		pagetitle  := readstring('room', 'name',    DEFTITLE);
-		videoid    := readstring('room', 'video',   DEFVIDEO);
-		banner     := readstring('room', 'banner',        '');
-		ircconf    := readstring('room', 'irc-settings',  '');
-		tags       := readstring('room', 'tags',          '');
+		roomurl     := readstring('room', 'url',           '');
+		password    := readstring('room', 'password',      '');
+		hostpass    := readstring('room', 'host-password', '');
+		pagetitle   := readstring('room', 'name',    DEFTITLE);
+		videoid     := readstring('room', 'video',   DEFVIDEO);
+		banner      := readstring('room', 'banner',        '');
+		favicon     := readstring('room', 'favicon',       '');
+		ircconf     := readstring('room', 'irc-settings',  '');
+		tags        := readstring('room', 'tags',          '');
 		description := readstring('room', 'description',   '');
+		roomscript  := readstring('room', 'script',        '');
+		roomstyle   := readstring('room', 'style',         '');
 
 		free
 	end;
@@ -101,6 +107,16 @@ begin
 
 	write('<tr>');
 	write('<td>');
+	write('Favicon:');
+	write('</td>');
+	write('<td>');
+	write('<input type="text" name="favicon" ',
+		'value="', favicon, '">');
+	write('</td>');
+	writeln('</tr>');
+
+	write('<tr>');
+	write('<td>');
 	write('IRC Settings:');
 	write('</td>');
 	write('<td>');
@@ -146,6 +162,26 @@ begin
 	write('<td>');
 	write('<input type="text" name="description" ',
 		'value="', description, '">');
+	write('</td>');
+	writeln('</tr>');
+
+	write('<tr>');
+	write('<td>');
+	write('Custom Script:');
+	write('</td>');
+	write('<td>');
+	write('<input type="text" name="script" ',
+		'value="', roomscript, '">');
+	write('</td>');
+	writeln('</tr>');
+
+	write('<tr>');
+	write('<td>');
+	write('Custom Style:');
+	write('</td>');
+	write('<td>');
+	write('<input type="text" name="style" ',
+		'value="', roomstyle, '">');
 	write('</td>');
 	writeln('</tr>');
 

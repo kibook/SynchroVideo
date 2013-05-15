@@ -16,20 +16,20 @@ var
 	params     : thttpquery;
 	query      : thttpquerypair;
 	sessionkey : string;
+	roomscript : string;
+	roomstyle  : string;
 	sessionid  : string;
 	pagetitle  : string;
 	password   : string;
 	hostpass   : string;
 	roomdesc   : string;
+	favicon    : string;
 	videoid    : string;
 	ircconf    : string;
 	banner     : string;
-	each       : string;
 	authuser   : boolean = FALSE;
 	ishost     : boolean = FALSE;
 	ref        : text;
-	scripts    : tstringlist;
-	styles     : tstringlist;
 begin
 	writeln('Content-Type: text/html');
 	writeln;
@@ -38,27 +38,25 @@ begin
 
 	with ini do
 	begin
-		password  := readstring('room', 'password', '');
-		hostpass  := readstring('room', 'host-password', '');
-		pagetitle := readstring('room', 'name', DEFTITLE);
-		videoid   := readstring('room', 'video', DEFVIDEO);
-		banner    := readstring('room', 'banner', '');
-		ircconf   := readstring('room', 'irc-settings', '');
-		roomdesc  := readstring('room', 'description', '');
+		password   := readstring('room', 'password',      '');
+		hostpass   := readstring('room', 'host-password', '');
+		pagetitle  := readstring('room', 'name',    DEFTITLE);
+		videoid    := readstring('room', 'video',   DEFVIDEO);
+		banner     := readstring('room', 'banner',        '');
+		ircconf    := readstring('room', 'irc-settings',  '');
+		roomdesc   := readstring('room', 'description',   '');
+		favicon    := readstring('room', 'favicon',       '');
+		roomscript := readstring('room', 'script',        '');
+		roomstyle  := readstring('room', 'style',         '');
+
+		free
 	end;
 
 	if videoid = '' then
 		videoid := DEFVIDEO;
-
-	scripts := tstringlist.create;
-	styles  := tstringlist.create;
-
-	with ini do
-	begin
-		readsection('scripts', scripts);
-		readsection('styles', styles);
-		free
-	end;
+	
+	if favicon = '' then
+		favicon := '../res/favicon.gif';
 
 	params := getquery(getrequest);
 
@@ -71,6 +69,8 @@ begin
 		'href="../general.css">');
 	writeln('<link rel="stylesheet" type="text/css" ',
 		'href="../room.css">');
+
+	writeln('<link rel="icon" href="', favicon, '">');
 
 	writeln('</head>');
 	writeln('<body>');
@@ -122,7 +122,7 @@ begin
 	writeln('<tr>');
 	writeln('<td width="50%">');
 
-	writeln('<object>');
+	writeln('<object id="movie_container">');
 	writeln('<param name="movie" value="http://www.youtube.com/v/',
 		videoid, '?enablejsapi=1&amp;version=3&autoplay=1">',
 		'</param>');
@@ -274,7 +274,6 @@ begin
 	writeln('</tr>');
 	writeln('</table>');
 
-
 	writeln('<h3>Settings</h3>');
 
 	writeln('<p>');
@@ -347,6 +346,9 @@ begin
 	writeln('[Room Settings]</a>');
 	writeln('</p>');
 	writeln('</center>');
+
+	writeln('<hr noshade>');
+	writeln('<div id="sandbox"></div>');	
 	
 	writeln('<script>');
 	if ishost then
@@ -379,15 +381,15 @@ begin
 	writeln('<script type="text/javascript" src="../init.js">',
 		'</script>');
 
-	for each in scripts do
-		write('<script type="text/javascript" ',
-			'src="', each, '"></script>');
-	scripts.free;
+	{ Custom scripts and styles }
 
-	for each in styles do
-		writeln('<link rel="stylesheet" type="text/css" ',
-			'href="', each, '"></style>');
-	styles.free;
+	if not (roomscript = '') then
+		writeln('<script type="text/javascript" src="',
+			roomscript, '"></script>');
+	
+	if not (roomstyle = '') then
+		writeln('<link rel="stylesheet" type="text/css" href="',
+			roomstyle, '">');
 
 	writeln('</body>');
 	writeln('</html>')
