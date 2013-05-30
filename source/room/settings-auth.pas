@@ -1,34 +1,31 @@
-uses inifiles;
+uses
+	inifiles;
 var
-	ini       : tinifile;
-	pagetitle : string;
+	Ini       : TIniFile;
+	PageTitle : String;
 begin
-	writeln('Content-Type: text/html');
-	writeln;
+	WriteLn('Content-Type: text/html');
+	WriteLn;
 
-	ini := tinifile.create('settings.ini');
+	Ini := TIniFile.Create('settings.ini');
+	PageTitle := Ini.ReadString('room', 'name', 'Sync Vid');
+	Ini.Free;
 
-	with ini do
-	begin
-		pagetitle := readstring('room', 'name', 'Sync Vid');
-		free
-	end;
-
-	writeln('<html>');
-	writeln('<head>');
-	writeln('<title>', pagetitle, ' Settings Auth</title>');
-	writeln('<link rel="stylesheet" type="text/css" ',
+	WriteLn('<html>');
+	WriteLn('<head>');
+	WriteLn('<title>', PageTitle, ' Settings Auth</title>');
+	WriteLn('<link rel="stylesheet" type="text/css" ',
 		'href="../general.css">');	
-	writeln('</head>');
-	writeln('<body onload="document.form.host.focus()">');
-	writeln('<center>');
-	writeln('<h1>Authorization</h1>');
-	writeln('<form name="form" action="settings.cgi" method="POST">');
-	writeln('Password:<br>');
-	writeln('<input type="password" name="host"><br>');
-	writeln('<input type="submit">');
-	writeln('</form>');
-	writeln('</center>');
-	writeln('</body>');
-	writeln('</html>')
+	WriteLn('</head>');
+	WriteLn('<body onload="document.form.host.focus()">');
+	WriteLn('<center>');
+	WriteLn('<h1>Authorization</h1>');
+	WriteLn('<form name="form" action="settings.cgi" method="POST">');
+	WriteLn('Password:<br>');
+	WriteLn('<input type="password" name="host"><br>');
+	WriteLn('<input type="submit">');
+	WriteLn('</form>');
+	WriteLn('</center>');
+	WriteLn('</body>');
+	WriteLn('</html>')
 end.

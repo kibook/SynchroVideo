@@ -1,11 +1,16 @@
 body {
-  background-color: #222;
-  color: #aaa;
-  font-family: Arial, Helvetica, sans-serif;
+	background-color: #222;
+	color: #aaa;
+	font-family: Arial, Helvetica, sans-serif;
 }
-a {
-  color: #a10;
+a:link, a:visited, a:active {
+	color: #a10;
+	text-decoration: none;
+}
+a:hover, td.link a:hover {
+	color: #d43;
+	text-decoration: underline;
 }
 p.smalltext {
-  font-size: 13px;
+	font-size: 13px;
 }

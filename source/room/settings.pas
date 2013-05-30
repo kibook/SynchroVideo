@@ -1,209 +1,212 @@
-uses dos, strarrutils, inifiles, htmlutils;
+uses
+	dos,
+	strarrutils,
+	inifiles,
+	htmlutils;
+
 const
-	DEFTITLE     = 'Sync Vid';
-	DEFVIDEO     = 'YTu-ctARF2w';
+	DefTitle     = 'Sync Vid';
+	DefVideo     = 'YTu-ctARF2w';
 
 var
-	ini         : tinifile;
-	query       : thttpquerypair;
-	params      : thttpquery;
-	tags        : string;
-	banner      : string;
-	ircconf     : string;
-	videoid     : string;
-	favicon     : string;
-	password    : string;
-	hostpass    : string;
-	pagetitle   : string;
-	description : string;
-	roomscript  : string;
-	roomstyle   : string;
-	roomurl     : string;
-	isauth      : boolean = FALSE;
+	Ini         : TIniFile;
+	Query       : THttpQueryPair;
+	Params      : THttpQuery;
+	Tags        : String;
+	Banner      : String;
+	IrcConf     : String;
+	VideoId     : String;
+	Favicon     : String;
+	Password    : String;
+	HostPass    : String;
+	PageTitle   : String;
+	Description : String;
+	RoomScript  : String;
+	RoomStyle   : String;
+	RoomUrl     : String;
+	IsAuth      : Boolean = False;
 begin
-	writeln('Content-Type: text/html');
-	writeln;
+	WriteLn('Content-Type: text/html');
+	WriteLn;
 
 	ini := tinifile.create('settings.ini');
 
-	with ini do
-	begin
-		roomurl     := readstring('room', 'url',           '');
-		password    := readstring('room', 'password',      '');
-		hostpass    := readstring('room', 'host-password', '');
-		pagetitle   := readstring('room', 'name',    DEFTITLE);
-		videoid     := readstring('room', 'video',   DEFVIDEO);
-		banner      := readstring('room', 'banner',        '');
-		favicon     := readstring('room', 'favicon',       '');
-		ircconf     := readstring('room', 'irc-settings',  '');
-		tags        := readstring('room', 'tags',          '');
-		description := readstring('room', 'description',   '');
-		roomscript  := readstring('room', 'script',        '');
-		roomstyle   := readstring('room', 'style',         '');
+	RoomUrl     := Ini.ReadString('room', 'url',           '');
+	Password    := Ini.ReadString('room', 'password',      '');
+	HostPass    := Ini.ReadString('room', 'host-password', '');
+	PageTitle   := Ini.ReadString('room', 'name',          '');
+	VideoId     := Ini.ReadString('room', 'video',         '');
+	Banner      := Ini.ReadString('room', 'banner',        '');
+	Favicon     := Ini.ReadString('room', 'favicon',       '');
+	IrcConf     := Ini.ReadString('room', 'irc-settings',  '');
+	Tags        := Ini.ReadString('room', 'tags',          '');
+	Description := Ini.ReadString('room', 'description',   '');
+	RoomScript  := Ini.ReadString('room', 'script',        '');
+	RoomStyle   := Ini.ReadString('room', 'style',         '');
 
-		free
-	end;
+	Ini.Free;
 
-	params := getquery(getrequest);
+	Params := GetQuery(GetRequest);
 
-	writeln('<html>');
-	writeln('<head>');
-	writeln('<link rel="stylesheet" type="text/css" ',
+	WriteLn('<html>');
+	WriteLn('<head>');
+	WriteLn('<link rel="stylesheet" type="text/css" ',
 		'href="../general.css">');
-	writeln('</head>');
-	writeln('<body>');
-	writeln('<center>');
+	WriteLn('</head>');
+	WriteLn('<body>');
+	WriteLn('<center>');
 
-	for query in params do
-		case query[0] of
+	for Query in Params do
+		case Query[0] of
 			'host': if
-				not (query[1] = '') and
-				(query[1] = hostpass)
+				not (Query[1] = '') and
+				(Query[1] = HostPass)
 			then
-				isauth := TRUE
-			else begin
-				writeln('<h1>Error!</h1>');
-				writeln('Password Invalid');
-				redirect('settings-auth.cgi', 1);
-				halt(0)
+				IsAuth := True
+			else
+			begin
+				WriteLn('<h1>Error!</h1>');
+				WriteLn('Password Invalid');
+				Redirect('settings-auth.cgi', 1);
+				Halt
 			end
 		end;
 	
-	if not isauth then
+	if not IsAuth then
 	begin
-		writeln('<h1>Error!</h1>');
-		writeln('Settings page requires a password');
-		redirect('settings-auth.cgi', 1);
+		WriteLn('<h1>Error!</h1>');
+		WriteLn('Settings page requires a password');
+		Redirect('settings-auth.cgi', 1);
 		halt
 	end;
 
-	writeln('<h1>Settings</h1>');
-	writeln('<form name="form" action="configure.cgi" method="POST">');
+	WriteLn('<h1>Settings</h1>');
+	WriteLn('<form name="form" action="configure.cgi" method="POST">');
 
-	writeln('<input type="text" name="host" value="' + hostpass + '" ',
+	WriteLn('<input type="text" name="host" value="' + HostPass + '" ',
 		'style="display:none;">');
 
-	writeln('<table cellpadding="5">');
+	WriteLn('<table cellpadding="5">');
 
-	write('<tr>');
-	write('<td>');
-	write('Room Title:');
-	write('</td>');
-	write('<td>');
-	write('<input type="text" name="title" ',
-		'value="' + pagetitle + '">');
-	write('</td>');
-	writeln('</tr>');
+	Write('<tr>');
+	Write('<td>');
+	Write('Room Title:');
+	Write('</td>');
+	Write('<td>');
+	Write('<input type="text" name="title" ',
+		'value="' + PageTitle + '">');
+	Write('</td>');
+	WriteLn('</tr>');
 
-	write('<tr>');
-	write('<td>');
-	write('Banner:');
-	write('</td>');
-	write('<td>');
-	write('<input type="text" name="banner" ',
-		'value="', banner, '">');
-	write('</td>');
-	writeln('</tr>');
+	Write('<tr>');
+	Write('<td>');
+	Write('Banner:');
+	Write('</td>');
+	Write('<td>');
+	Write('<input type="text" name="banner" ',
+		'value="', Banner, '">');
+	Write('</td>');
+	WriteLn('</tr>');
 
-	write('<tr>');
-	write('<td>');
-	write('Favicon:');
-	write('</td>');
-	write('<td>');
-	write('<input type="text" name="favicon" ',
-		'value="', favicon, '">');
-	write('</td>');
-	writeln('</tr>');
+	Write('<tr>');
+	Write('<td>');
+	Write('Favicon:');
+	Write('</td>');
+	Write('<td>');
+	Write('<input type="text" name="favicon" ',
+		'value="', Favicon, '">');
+	Write('</td>');
+	WriteLn('</tr>');
 
-	write('<tr>');
-	write('<td>');
-	write('IRC Settings:');
-	write('</td>');
-	write('<td>');
-	write('<input type="text" name="ircconf" ',
-		'value="', ircconf, '">');
-	write('</td>');
-	writeln('</tr>');
+	Write('<tr>');
+	Write('<td>');
+	Write('IRC Settings:');
+	Write('</td>');
+	Write('<td>');
+	Write('<input type="text" name="ircconf" ',
+		'value="', IrcConf, '">');
+	Write('</td>');
+	WriteLn('</tr>');
 
-	write('<tr>');
-	write('<td>');
-	write('Room Password:');
-	write('</td>');
-	write('<td>');
-	write('<input type="text" name="newpass" ',
-		'value="', password, '">');
-	write('</td>');
-	writeln('</tr>');
+	Write('<tr>');
+	Write('<td>');
+	Write('Room Password:');
+	Write('</td>');
+	Write('<td>');
+	Write('<input type="text" name="newpass" ',
+		'value="', Password, '">');
+	Write('</td>');
+	WriteLn('</tr>');
 
-	write('<tr>');
-	write('<td>');
-	write('Host Password:');
-	write('</td>');
-	write('<td>');
-	write('<input type="text" name="newhost" ',
-		'value="', hostpass, '">');
-	write('</td>');
-	writeln('</tr>');
+	Write('<tr>');
+	Write('<td>');
+	Write('Host Password:');
+	Write('</td>');
+	Write('<td>');
+	Write('<input type="text" name="newhost" ',
+		'value="', HostPass, '">');
+	Write('</td>');
+	WriteLn('</tr>');
 
-	write('<tr>');
-	write('<td>');
-	write('Room tags:');
-	write('</td>');
-	write('<td>');
-	write('<input type="text" name="tags" ',
-		'value="', tags, '">');
-	write('</td>');
-	writeln('</tr>');
+	Write('<tr>');
+	Write('<td>');
+	Write('Room tags:');
+	Write('</td>');
+	Write('<td>');
+	Write('<input type="text" name="tags" ',
+		'value="', Tags, '">');
+	Write('</td>');
+	WriteLn('</tr>');
 
-	write('<tr>');
-	write('<td>');
-	write('Description:');
-	write('</td>');
-	write('<td>');
-	write('<input type="text" name="description" ',
-		'value="', description, '">');
-	write('</td>');
-	writeln('</tr>');
+	Write('<tr>');
+	Write('<td>');
+	Write('Description:');
+	Write('</td>');
+	Write('<td>');
+	Write('<input type="text" name="description" ',
+		'value="', Description, '">');
+	Write('</td>');
+	WriteLn('</tr>');
 
-	write('<tr>');
-	write('<td>');
-	write('Custom Script:');
-	write('</td>');
-	write('<td>');
-	write('<input type="text" name="script" ',
-		'value="', roomscript, '">');
-	write('</td>');
-	writeln('</tr>');
+	Write('<tr>');
+	Write('<td>');
+	Write('Custom Script:');
+	Write('</td>');
+	Write('<td>');
+	Write('<input type="text" name="script" ',
+		'value="', RoomScript, '">');
+	Write('</td>');
+	WriteLn('</tr>');
 
-	write('<tr>');
-	write('<td>');
-	write('Custom Style:');
-	write('</td>');
-	write('<td>');
-	write('<input type="text" name="style" ',
-		'value="', roomstyle, '">');
-	write('</td>');
-	writeln('</tr>');
+	Write('<tr>');
+	Write('<td>');
+	Write('Custom Style:');
+	Write('</td>');
+	Write('<td>');
+	Write('<input type="text" name="style" ',
+		'value="', RoomStyle, '">');
+	Write('</td>');
+	WriteLn('</tr>');
 
-	writeln('</table>');
-	writeln('<input type="submit" value="Save Changes">');
+	WriteLn('</table>');
+	WriteLn('<input type="submit" value="Save Changes">');
 
-	writeln('</form>');
+	WriteLn('</form>');
 
-	writeln('<br><br>');
-	writeln('<form action="../deleteroom.cgi" method="POST" ',
+	WriteLn('<br><br>');
+	WriteLn('<form action="../deleteroom.cgi" method="POST" ',
 		'target="_blank">');
-	writeln('<input type="hidden" name="room" ',
-		'value="', roomurl, '">');
-	writeln('<input type="hidden" name="host" ',
-		'value="', hostpass, '">');
-	writeln('<input type="hidden" name="confirm" ',
+	WriteLn('<input type="hidden" name="room" ',
+		'value="', RoomUrl, '">');
+	WriteLn('<input type="hidden" name="host" ',
+		'value="', HostPass, '">');
+	WriteLn('<input type="hidden" name="confirm" ',
 		'value="false">');
-	writeln('<input type="submit" value="Delete Room">');
-	writeln('</form>');
+	WriteLn('<input type="submit" value="Delete Room">');
+	WriteLn('</form>');
 
 
-	writeln('</center>');
-	writeln('</body>');
-	writeln('</html>')
+	WriteLn('</center>');
+	WriteLn('</body>');
+	WriteLn('</html>')
 end.

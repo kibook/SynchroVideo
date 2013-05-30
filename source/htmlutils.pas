@@ -3,52 +3,52 @@
 
 unit htmlutils;
 
-{$longstrings on}
+{$h+}
 
 interface
 
 type
 	{ key=value pair for HTTP query }
-	thttpquerypair     = array of string;
+	THttpQueryPair     = Array of String;
 
 	{ HTTP GET/POST query }
-	thttpquery         = array of thttpquerypair;
+	THttpQuery         = Array of THttpQueryPair;
 
 { format HTML URL encoded strings to plain text }
-function html2text  (const rawtext : string) : string;
+function Html2Text  (const RawText : String) : String;
 
 { format plain text to HTML-safe encoding }
-function text2html  (const rawtext : string) : string;
+function Text2Html  (const RawText : String) : String;
 
 { escape incoming data to be web-safe }
-function escapetext (const rawtext : string) : string;
+function EscapeText (const RawText : String) : String;
 
 { convert a GET/POST request URL into a thttpquery for parsing }
-function getquery   (const request : string) : thttpquery;
+function GetQuery   (const Request : String) : THttpQuery;
 
 { fetch GET/POST request URL from incoming data }
-function getrequest                          : string;
+function GetRequest                          : String;
 
 
 { Get raw file data from a multipart/form-data POST request }
 
 { get the content-type of the file }
-function getfiletype(request : string)       : string;
+function GetFileType(Request : String)       : String;
 
 { get the contents of the file }
-function getfile    (request : string)       : string;
+function GetFile    (Request : String)       : String;
 
-procedure redirect  (url : string; time : word);
+procedure Redirect  (Url : String; Time : Word);
 
 implementation
 uses sysutils, strarrutils, dos, strutils;
 
 const
-	HTMLCODES: array [0..1] of string = (
+	HtmlCodes: Array [0..1] of String = (
 		'+',   #32
 	);
 
-	CLEANCODES: array [0..7] of string = (
+	CleanCodes: Array [0..7] of String = (
 		'"',  '&quot;',
 		'''', '&#39;',
 		'>',  '&gt;',
@@ -57,115 +57,115 @@ const
 
 	CRLF = #13#10;
 
-function converthex(rawtext : string) : string;
+function ConvertHex(RawText : String) : String;
 var
-	i    : integer;
-	ch   : char;
-	code : string;
+	i    : Integer;
+	Ch   : Char;
+	Code : String;
 begin
-	converthex := '';
-	if length(rawtext) > 0 then
+	ConvertHex := '';
+	if Length(RawText) > 0 then
 	begin
 		i := 1;
 		repeat
-			ch := rawtext[i];
+			ch := RawText[i];
 			if ch = '%' then
 			begin
-				code := concat(rawtext[i + 1],
-					rawtext[i + 2]);
-				converthex := concat(converthex,
-					chr(hex2dec(code)));
+				Code := Concat(RawText[i + 1],
+					RawText[i + 2]);
+				ConvertHex := Concat(ConvertHex,
+					Chr(Hex2Dec(Code)));
 				inc(i, 2)
 			end
 			else
-				converthex := concat(converthex, ch);
-			inc(i)
-		until i > length(rawtext)
+				ConvertHex := Concat(ConvertHex, Ch);
+			Inc(i)
+		until i > Length(RawText)
 	end
 end;
 
-function replacetext(rawtext : string;
-	const list : array of string) : string;
+function ReplaceText(RawText : String;
+	const List : Array of String) : String;
 var
-	i : integer;
+	i : Integer;
 begin
-	replacetext := rawtext;
-	for i := 0 to high(list) div 2 do
-		replacetext := stringreplace(replacetext, list[i*2],
-			list[i*2+1], [rfreplaceall]);
+	ReplaceText := RawText;
+	for i := 0 to High(list) div 2 do
+		ReplaceText := StringReplace(ReplaceText, List[i*2],
+			List[i*2+1], [rfReplaceAll]);
 end;
 
-function getfiletype(request : string) : string;
+function GetFileType(Request : String) : String;
 var
-	anchor : string;
+	Anchor : String;
 begin
-	anchor := 'Content-Type: ';
-	getfiletype := copy(request, pos(anchor, request) + length(anchor),
-		length(request));
-	getfiletype := copy(getfiletype, 1, pos(CRLF, getfiletype))
+	Anchor := 'Content-Type: ';
+	GetFiletype := Copy(Request, Pos(Anchor, Request) + Length(Anchor),
+		Length(Request));
+	GetFiletype := Copy(GetFiletype, 1, Pos(CRLF, GetFileType))
 end;
 
-function getfile(request : string) : string;
+function GetFile(Request : String) : String;
 var
-	anchor : string;
+	Anchor : String;
 begin
-	anchor := 'Content-Type: ' + getfiletype(request);
-	getfile := copy(request, pos(anchor, request) + length(anchor) + 3,
-		length(request));
-	getfile := copy(getfile, 1, pos('------', getfile) - 2)
+	Anchor := 'Content-Type: ' + GetFiletype(Request);
+	GetFile := Copy(Request, Pos(Anchor, Request) + Length(Anchor) + 3,
+		Length(Request));
+	GetFile := Copy(GetFile, 1, Pos('------', GetFile) - 2)
 end;
 
-function html2text(const rawtext : string) : string;
+function Html2Text(const RawText : String) : String;
 begin
-	html2text := replacetext(converthex(rawtext), HTMLCODES)
+	Html2Text := ReplaceText(ConvertHex(RawText), HtmlCodes)
 end;
 
-function text2html(const rawtext : string) : string;
+function Text2Html(const RawText : String) : String;
 begin
-	text2html := replacetext(rawtext, CLEANCODES)
+	Text2Html := ReplaceText(RawText, CleanCodes)
 end;
 
-function escapetext(const rawtext : string) : string;
+function EscapeText(const RawText : String) : String;
 begin
-	escapetext := text2html(html2text(rawtext))
+	EscapeText := Text2Html(Html2Text(RawText))
 end;
 
-function getquery(const request: string): thttpquery;
+function GetQuery(const Request: String): THttpQuery;
 var
-	pairs : tstringarray;
-	each  : string;
-	len   : word;
+	Pairs : TStringArray;
+	Each  : String;
+	Len   : Word;
 begin
-	pairs := split(request, '&');
-	setlength(getquery, 0);
-	for each in pairs do
+	Pairs := Split(Request, '&');
+	SetLength(GetQuery, 0);
+	for Each in Pairs do
 	begin
-		len := length(getquery);
-		setlength(getquery, len + 1, 2);
-		getquery[len] := split(each, '=')
+		Len := Length(GetQuery);
+		SetLength(GetQuery, Len + 1, 2);
+		GetQuery[Len] := Split(Each, '=')
 	end
 end;
 
-function getrequest : string;
+function GetRequest : String;
 var
-	ch : char;
+	Ch : Char;
 begin
-	if getenv('REQUEST_METHOD') = 'POST' then
+	if GetEnv('REQUEST_METHOD') = 'POST' then
 	begin
-		getrequest := '';
+		GetRequest := '';
 		repeat
-			read(ch);
-			getrequest := concat(getrequest, ch)
-		until eof(input)
+			Read(Ch);
+			GetRequest := Concat(GetRequest, Ch)
+		until EOF(input)
 	end
 	else
-		getrequest := getenv('QUERY_STRING')
+		GetRequest := GetEnv('QUERY_STRING')
 end;
 
-procedure redirect(url : string; time : word);
+procedure Redirect(Url : String; Time : word);
 begin
-	writeln('<meta http-equiv="refresh" content="', time,
-		';url=', url, '">')
+	WriteLn('<meta http-equiv="refresh" content="', Time,
+		';url=', Url, '">')
 end;
 
 end.

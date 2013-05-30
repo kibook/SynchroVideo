@@ -1,45 +1,53 @@
-uses inifiles, process;
+uses
+	inifiles,
+	process;
+
 var
-	ini   : tinifile;
-	proc  : tprocess;
-	rooms : array of string;
-	room  : string;
-	ref   : text;
-	len   : integer;
+	Ini   : TIniFile;
+	Proc  : TProcess;
+	Rooms : Array of String;
+	Room  : String;
+	Ref   : Text;
+	Len   : Integer;
 begin
-	ini := tinifile.create('rooms.ini');
-	ini.cacheupdates := TRUE;
+	Ini := TIniFile.Create('rooms.ini');
+	Ini.CacheUpdates := True;
 
-	ini.deletekey('rooms', paramstr(1));
-	ini.updatefile;
-	ini.free;
+	Ini.DeleteKey('rooms', ParamStr(1));
+	Ini.UpdateFile;
+	Ini.Free;
 
-	proc := tprocess.create(NIL);
+	Proc := TProcess.Create(NIL);
 	{$ifdef unix}
-		proc.executable := 'rm';
-		proc.parameters.add('-r');
+		Proc.Executable := 'rm';
+		Proc.Parameters.Add('-r');
 	{$endif}
 	{$ifdef win32}
-		proc.executable := 'del';
+		Proc.Executable := 'del';
 	{$endif}
-	proc.parameters.add(paramstr(1));
-	proc.options := [pousepipes];
-	proc.execute;
-	proc.waitonexit;
-	proc.free;
+	Proc.Parameters.Add(ParamStr(1));
+	Proc.Options := [poUsePipes];
+	Proc.Execute;
+	Proc.WaitOnExit;
+	Proc.Free;
 
-	setlength(rooms, 0);
-	assign(ref, 'rooms.list');
-	reset(ref);
+	SetLength(Rooms, 0);
+
+	Assign(Ref, 'rooms.list');
+	Reset(Ref);
+
 	repeat
-		len := length(rooms);
-		setlength(rooms, len + 1);
-		readln(ref, rooms[len])
-	until eof(ref);
-	close(ref);
-	rewrite(ref);
-	for room in rooms do
-		if room <> paramstr(1) then
-			writeln(ref, room);
-	close(ref)
+		Len := Length(Rooms);
+		SetLength(Rooms, Len + 1);
+		ReadLn(Ref, Rooms[Len])
+	until EOF(Ref);
+
+	Close(Ref);
+
+	Rewrite(Ref);
+
+	for Room in Rooms do
+		if Room <> ParamStr(1) then
+			WriteLn(Ref, Room);
+	Close(Ref)
 end.

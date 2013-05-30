@@ -1,63 +1,65 @@
-uses classes, inifiles;	
+uses
+	classes,
+	inifiles;	
 
 var
-	rooms : tstringlist;
-	title : string;	
-	room  : string;
-	desc  : string;
-	ini   : tinifile;
-	i     : integer;
-	priv  : boolean;
+	Rooms : TStringList;
+	Title : String;	
+	Room  : String;
+	Desc  : String;
+	Ini   : TIniFile;
+	i     : Integer;
+	Priv  : Boolean;
 begin
-	writeln('Content-Type: text/html');
-	writeln;
+	WriteLn('Content-Type: text/html');
+	WriteLn;
 
-	writeln('<html>');
-	writeln('<head>');
-	writeln('<link rel="stylesheet" type="text/css" ',
+	WriteLn('<html>');
+	WriteLn('<head>');
+	WriteLn('<link rel="stylesheet" type="text/css" ',
 		'href="../general.css">');
-	writeln('<title>Room Listing</title>');
-	writeln('</head>');
-	writeln('<body>');
-	writeln('<center>');
-	writeln('<a href="../">&lt;- Home</a>');
-	writeln('<h1><u>Room Listing</u></h1>');
+	WriteLn('<title>Room Listing</title>');
+	WriteLn('</head>');
+	WriteLn('<body>');
+	WriteLn('<center>');
+	WriteLn('<a href="../">&lt;- Home</a>');
+	WriteLn('<h1><u>Room Listing</u></h1>');
 
-	ini   := tinifile.create('../rooms.ini');
-	rooms := tstringlist.create;
-	ini.readsection('rooms', rooms);
-	ini.free;
+	Ini   := TIniFile.Create('../rooms.ini');
+	Rooms := TStringList.Create;
+	Ini.ReadSection('rooms', Rooms);
+	Ini.Free;
 
-	rooms.sort;
+	Rooms.Sort;
 
-	writeln('<table cellpadding="30">');
+	WriteLn('<table cellpadding="30">');
 	i := 0;
-	for room in rooms do
+	for Room in Rooms do
 	begin
-		ini := tinifile.create('../'+room+'/settings.ini');
-		priv := not (ini.readstring('room', 'password', '') = '');
+		Ini := TIniFile.Create('../'+Room+'/settings.ini');
+		Priv := not (Ini.ReadString('room', 'password', '') = '');
 
-		if not priv then
+		if not Priv then
 		begin
 			if i mod 3 = 0 then
-				writeln('<tr>');
-			writeln('<td>');
-			title := ini.readstring('room', 'name', '');
-			desc  := ini.readstring('room', 'description', '');
-			writeln('<div title="', desc, '">');
-			writeln('<h3><a href="../', room, '">', title,
+				WriteLn('<tr>');
+			WriteLn('<td>');
+			Title := Ini.ReadString('room', 'name', '');
+			Desc  := Ini.ReadString('room', 'description', '');
+			WriteLn('<div title="', Desc, '">');
+			WriteLn('<h3><a href="../', Room, '">', Title,
 				'</a></h3>');
-			writeln('</div>');
-			writeln('</td>');
+			WriteLn('</div>');
+			WriteLn('</td>');
 			if i mod 3 = 2 then
-				writeln('</tr>');
-			ini.free;
-			inc(i)
+				WriteLn('</tr>');
+			Ini.Free;
+			Inc(i)
 		end
 	end;
-	writeln('</table>');
+	WriteLn('</table>');
 
-	writeln('</center>');
-	writeln('</body>');
-	writeln('</html>')
+	WriteLn('</center>');
+	WriteLn('</body>');
+	WriteLn('</html>')
 end.

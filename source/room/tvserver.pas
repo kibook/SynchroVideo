@@ -1,120 +1,123 @@
-uses strarrutils, inifiles, classes, crt, strutils, sysutils, fphttpclient;
+uses
+	strarrutils,
+	inifiles,
+	classes,
+	crt,
+	strutils,
+	sysutils,
+	fphttpclient;
 const
-	BUFFERFILE = 'syncvid.syn';
+	BufferFile = 'syncvid.syn';
 	YTAPIURL   = 'http://gdata.youtube.com/feeds/api/videos/';	
 
-function getduration(id : string) : double;
+function GetDuration(Id : String) : Double;
 var
-	content : ansistring;
-	a       : word;
-	b       : word;
+	Content : AnsiString;
+	a       : Word;
+	b       : Word;
 begin
-	with tfphttpclient.create(NIL) do
+	GetDuration := 0;
+	with TFPHttpClient.Create(NIL) do
 	begin
-		content := get(YTAPIURL + id);
-		free
+		Content := Get(YTAPIURL + Id);
+		Free
 	end;
-	a := pos('<yt:duration seconds=''', content) + 22;
-	content := copy(content, a, length(content));
-	b := pos('''/>', content);
-	getduration := strtoint(copy(content, 1, b - 1))
+	a := Pos('<yt:duration seconds=''', Content) + 22;
+	Content := Copy(Content, a, Length(Content));
+	b := Pos('''/>', Content);
+	GetDuration := StrToInt(Copy(Content, 1, b - 1))
 end;
 
 var
-	ref        : text;
-	videos     : tstringlist;
-	ini        : tinifile;
-	sessionkey : string;
-	sessionid  : string;
-	hostpass   : string;
-	videoid    : string;
-	getstr     : string;
-	tvmode     : string;
-	duration   : double;
-	time       : double;
-	index      : word;
-	i          : word;
+	Ref        : Text;
+	Videos     : TStringList;
+	Ini        : TIniFile;
+	SessionKey : String;
+	SessionId  : String;
+	HostPass   : String;
+	VideoId    : String;
+	GetStr     : String;
+	TvMode     : String;
+	Duration   : Double;
+	Time       : Double;
+	Index      : Word;
+	i          : Word;
 begin
-	ini := tinifile.create('settings.ini');
-	
-	with ini do
-	begin
-		hostpass := readstring('room', 'host-password', '');
-		free
-	end;
+	Ini := TIniFile.Create('settings.ini');
+	HostPass := Ini.ReadString('room', 'host-password', '');
+	Ini.Free;
 
-	ini    := tinifile.create('playlist.ini');
-	videos := tstringlist.create;
+	Videos := TStringList.Create;
 
-	with ini do
-	begin
-		readsection('videos', videos);
-		free
-	end;
+	Ini := TIniFile.Create('playlist.ini');
+	Ini.ReadSection('videos', Videos);
+	Ini.Free;
 
-	randomize;
-	str(random($FFFF), sessionid);
-	str(random($FFFF), sessionkey);
-	sessionid := xorencode(sessionkey, sessionid);
+	Randomize;
+	Str(Random($FFFF), SessionId);
+	Str(Random($FFFF), SessionKey);
+	SessionId := XorEncode(SessionKey, SessionId);
 
-	assign(ref, 'session.id');
-	rewrite(ref);
-	writeln(ref, xorencode(hostpass, sessionid));
-	close(ref);
+	Assign(Ref, 'session.id');
+	Rewrite(Ref);
+	Writeln(Ref, XorEncode(HostPass, SessionId));
+	Close(Ref);
 
-	assign(ref, BUFFERFILE);
-	reset(ref);
-	readln(ref, videoid);
-	readln(ref, getstr);
-	readln(ref, getstr);
-	time := strtoint(getstr);
-	readln(ref, tvmode);
-	close(ref);
+	Assign(Ref, BufferFile);
+	Reset(Ref);
+	ReadLn(Ref, VideoId);
+	ReadLn(Ref, GetStr);
+	ReadLn(Ref, GetStr);
+	Time := StrToFloat(GetStr);
+	ReadLn(Ref, TvMode);
+	close(Ref);
 
-	rewrite(ref);
-	writeln(ref, videoid);
-	writeln(ref, '0');
-	writeln(ref, format('%.2F', [time]));
-	writeln(ref, '1');
-	close(ref);
+	Rewrite(Ref);
+	WriteLn(Ref, VideoId);
+	WriteLn(Ref, '0');
+	WriteLn(Ref, Format('%.2F', [Time]));
+	WriteLn(Ref, '1');
+	Close(Ref);
 
-	duration := getduration(videoid);
-	index := 0;
-	for i := 0 to videos.count - 1 do
-		if videos.strings[i] = videoid then
-			index := i;
+	Duration := GetDuration(VideoId);
+	Index := 0;
+	for i := 0 to Videos.Count - 1 do
+		if Videos[i] = VideoId then
+			Index := i;
 	repeat
-		reset(ref);
-		readln(ref, videoid);
-		readln(ref, getstr);
-		readln(ref, getstr);
-		time := strtoint(getstr);
-		readln(ref, tvmode);
-		close(ref);
+		Reset(Ref);
+		ReadLn(Ref, VideoId);
+		ReadLn(Ref, GetStr);
+		ReadLn(Ref, GetStr);
+		Time := StrToFloat(GetStr);
+		ReadLn(Ref, TvMode);
+		Close(Ref);
 
-		delay(1000);
-		time := time + 1.00;
+		Delay(1000);
+		Time := Time + 1.00;
 
-		if time > duration then
+		//writeln('TIME: ', time, '||DURATION: ', duration);
+
+		if Time > Duration then
 		begin
-			index := (index + 1) mod videos.count;
-			videoid := videos.strings[index];
-			time := 0;
-			duration := getduration(videoid)
+			Index := (Index + 1) mod Videos.Count;
+			VideoId := Videos[Index];
+			Time := 0;
+			Duration := GetDuration(VideoId)
 		end;
 
-		reset(ref);
-		readln(ref, getstr);
-		readln(ref, getstr);
-		readln(ref, getstr);
-		readln(ref, tvmode);
-		close(ref);
+		Reset(Ref);
+		ReadLn(Ref, GetStr);
+		ReadLn(Ref, GetStr);
+		ReadLn(Ref, GetStr);
+		ReadLn(Ref, TvMode);
+		Close(Ref);
 		
-		rewrite(ref);
-		writeln(ref, videoid);
-		writeln(ref, '0');
-		writeln(ref, format('%.2F', [time]));
-		writeln(ref, tvmode);
-		close(ref)
-	until tvmode = '0';
+		Rewrite(Ref);
+		WriteLn(Ref, VideoId);
+		WriteLn(Ref, '0');
+		WriteLn(Ref, Format('%.2F', [Time]));
+		WriteLn(Ref, TvMode);
+		Close(Ref)
+	until TvMode = '0';
 end.

@@ -1,439 +1,456 @@
 {$mode objfpc}
-uses dos, strarrutils, inifiles, classes, strutils, math, htmlutils,
-	sysutils, fphttpclient;
+uses
+	dos,
+	strarrutils,
+	inifiles,
+	classes,
+	strutils,
+	math,
+	htmlutils,
+	sysutils,
+	fphttpclient;
 
 const
 	YTAPIURL   = 'http://gdata.youtube.com/feeds/api/videos/';
 	YTPLAPIURL = 'http://gdata.youtube.com/feeds/api/playlists/';
-	VALIDCHARS = ['a'..'z', '0'..'9'];
+	ValidChars = ['a'..'z', '0'..'9'];
 
 var
-	ini: tinifile;
+	Ini: TIniFile;
 
-function getplaylists : tstringlist;
+function GetPlaylists : TStringList;
 var
-	info   : tsearchrec;
-	fatype : word;
+	Info   : TSearchRec;
+	faType : Word;
+
+procedure CheckFile;
 begin
-	getplaylists := tstringlist.create;
-	if findfirst('playlists/*',faanyfile and fadirectory,info)=0 then
+	faType := Info.Attr and faDirectory;
+	if not (faType = faDirectory) then
+		GetPlaylists.Add(Copy(Info.Name, 1, Length(Info.name) - 4))
+end;
+
+begin
+	GetPlaylists := TStringList.Create;
+	if FindFirst('playlists/*',faAnyFile and faDirectory,Info)=0 then
 	begin
 		repeat
-			fatype := info.attr and fadirectory;
-			if not (fatype = fadirectory) then
-				getplaylists.add(copy(info.name, 1,
-					length(info.name) - 4))
-		until not (findnext(info) = 0)
+			CheckFile
+		until not (FindNext(Info) = 0)
 	end;
-	findclose(info)
+	FindClose(Info)
 end;
 
-function gettitle(id : string) : string;
+function GetTitle(Id : String) : String;
 var
-	content : ansistring;
-	a       : word;
-	b       : word;
+	Content : AnsiString;
+	a       : Word;
+	b       : Word;
 begin
-	with tfphttpclient.create(NIL) do
+	with TFPHttpClient.Create(Nil) do
 	begin
-		content := get(YTAPIURL + id + '?fields=title');
-		free
+		Content := Get(YTAPIURL + Id + '?fields=title');
+		Free
 	end;
 
-	a := pos('<title type=''text''>', content) + 19;
-	b := pos('</title>', content);
-	gettitle := text2html(copy(content, a, b - a));
+	a := Pos('<title type=''text''>', Content) + 19;
+	b := Pos('</title>', Content);
+	GetTitle := Text2Html(Copy(Content, a, b - a));
 end;
 
-function getlistsize(id : string) : word;
+function GetListSize(Id : String) : Word;
 const
-	tag    = 'openSearch:totalResults';
-	params = '?v=2&fields=' + tag;
+	Tag    = 'openSearch:totalResults';
+	Params = '?v=2&fields=' + Tag;
 var
-	content : ansistring;
-	a       : word;
-	b       : word;
+	Content : AnsiString;
+	a       : Word;
+	b       : Word;
 begin
-	getlistsize := 50;
+	GetListSize := 50;
 
-	with tfphttpclient.create(NIL) do
+	with TFPHttpClient.Create(Nil) do
 	begin
-		content := get(YTPLAPIURL + id + params);
-		free
+		Content := Get(YTPLAPIURL + Id + Params);
+		Free
 	end;
 
-	a := pos('<'  + tag + '>', content) + 25;
-	b := pos('</' + tag + '>', content);
-	getlistsize := strtoint(copy(content, a, b - a))
+	a := Pos('<'  + Tag + '>', Content) + 25;
+	b := Pos('</' + Tag + '>', Content);
+	GetListSize := StrToInt(Copy(Content, a, b - a))
 end;
 
-procedure importlist(id : string);
+procedure ImportList(Id : String);
 const
-	params = '?v=2&max-results=50&start-index=';
+	Params = '?v=2&max-results=50&start-index=';
 var
-	content  : ansistring;
-	title    : string;
-	videoid  : string;
-	index    : string;
-	requests : word;
-	a        : word;
-	b        : word;
-	i        : word;
+	Content  : AnsiString;
+	Title    : String;
+	VideoId  : String;
+	Index    : String;
+	Requests : Word;
+	a        : Word;
+	b        : Word;
+	i        : Word;
 
-procedure parselist;
+procedure ParseList;
 begin
-	str((50 * i) + 1, index);
+	Str((50 * i) + 1, Index);
 	
-	with tfphttpclient.create(NIL) do
+	with TFPHttpClient.Create(Nil) do
 	begin
-		content := get(YTPLAPIURL + id + params + index);
-		free
+		Content := Get(YTPLAPIURL + Id + Params + Index);
+		Free
 	end;
 
-	a := pos('<media:title type=''plain''>', content) + 26;
-	b := pos('</media:title>', content);
-	content := copy(content, b + 13, length(content));
+	a := Pos('<media:title type=''plain''>', Content) + 26;
+	b := Pos('</media:title>', Content);
+	Content := Copy(Content, b + 13, Length(Content));
 
 	repeat
-		title := '';
-		a := pos('<media:title type=''plain''>',
-			content) + 26;
-		b := pos('</media:title>', content);
-		title := text2html(copy(content, a, b - a));
+		Title := '';
+		a := Pos('<media:title type=''plain''>', Content) + 26;
+		b := Pos('</media:title>', Content);
+		Title := Text2Html(Copy(Content, a, b - a));
 		
-		content := copy(content, b + 13, length(content));
+		Content := Copy(Content, b + 13, Length(Content));
 
-		videoid := '';
-		a := pos('<yt:videoid>',  content) + 12;
-		b := pos('</yt:videoid>', content);
-		videoid := copy(content, a, b - a);
+		VideoId := '';
+		a := Pos('<yt:videoid>',  Content) + 12;
+		b := Pos('</yt:videoid>', Content);
+		VideoId := Copy(Content, a, b - a);
 
-		content := copy(content, b + 13, length(content));
+		Content := Copy(Content, b + 13, Length(Content));
 
-		if not (title = '') and not (videoid = '') then
-			ini.writestring('videos', videoid, title)
-	until pos('<media:title type=''plain''>', content) = 0
+		if not (Title = '') and not (VideoId = '') then
+			Ini.WriteString('videos', VideoId, Title)
+	until Pos('<media:title type=''plain''>', Content) = 0
 end;
 	
 begin
-	requests := ceil(getlistsize(id) / 50.0);
+	Requests := Ceil(GetListSize(Id) / 50.0);
 	
-	for i := 0 to requests - 1 do
+	for i := 0 to Requests - 1 do
 	begin
-		parselist;
+		ParseList;
 	end
 end;
 
-function comparetitles(list : tstringlist;
-	index1, index2 : integer) : integer;
+function CompareTitles(List : TStringList;
+	Index1, Index2 : Integer) : Integer;
 var
 	t1, t2 : string;
 begin
-	t1 := ini.readstring('videos', list[index1], '???');
-	t2 := ini.readstring('videos', list[index2], '???');
-	comparetitles := ansicomparetext(t1, t2)
+	t1 := Ini.ReadString('videos', List[Index1], '???');
+	t2 := Ini.ReadString('videos', List[Index2], '???');
+	CompareTitles := AnsiCompareText(t1, t2)
 end;
 
-procedure writestatus(locked : boolean);
+procedure WriteStatus(Locked : Boolean);
 begin
-	write('Playlist.locked=');
-	if locked then
-		write('true')
+	Write('Playlist.locked=');
+	if Locked then
+		Write('true')
 	else
-		write('false');
-	writeln(';')
+		Write('false');
+	WriteLn(';')
 end;
 
-procedure writeplaylists;
+procedure WritePlaylists;
 var
-	video : string;
+	Video : String;
 begin
-	write('Playlists=[');
-	for video in getplaylists do
-		write('"', video, '",');
-	writeln('];')
+	Write('Playlists=[');
+	for Video in GetPlaylists do
+		Write('"', Video, '",');
+	WriteLn('];')
 end;
 
-procedure addvideo(id : string);
+procedure AddVideo(Id : String);
 begin
-	ini.writestring('videos', id, gettitle(id))
+	Ini.WriteString('videos', Id, GetTitle(Id))
 end;
 
-procedure deletevideo(id : string);
+procedure DeleteVideo(Id : String);
 begin
-	ini.deletekey('videos', id)
+	Ini.DeleteKey('videos', Id)
 end;
 
-procedure togglelock(lock : boolean);
+procedure ToggleLock(Lock : Boolean);
 var
-	status : string;
+	Status : String;
 begin
-	if lock then
-		status := 'true'
+	if Lock then
+		Status := 'true'
 	else
-		status := 'false';
-	ini.writestring('status', 'locked', status);
-	writeln('Playlist.locked=', status, ';')
+		Status := 'false';
+	Ini.WriteString('status', 'locked', Status);
+	writeln('Playlist.locked=', Status, ';')
 end;
 
-procedure clearlist;
+procedure ClearList;
 var
-	videos : tstringlist;
-	video  : string;
+	Videos : TStringList;
+	Video  : String;
 begin
-	videos := tstringlist.create;
-	ini.readsection('videos', videos);
-	for video in videos do
-		ini.deletekey('videos', video);
-	videos.free
+	Videos := TStringList.Create;
+	Ini.ReadSection('videos', Videos);
+	for Video in Videos do
+		Ini.DeleteKey('videos', Video);
+	Videos.Free
 end;
 
-procedure shufflelist;
+procedure ShuffleList;
 var
-	videos : tstringlist;
-	titles : tstringlist;
-	video  : string;
-	a      : word;
-	b      : word;
-	i      : word;
+	Videos : TStringList;
+	Titles : TStringList;
+	Video  : String;
+	a      : Word;
+	b      : Word;
+	i      : Word;
 begin
-	videos := tstringlist.create;
-	ini.readsection('videos', videos);
+	Videos := TStringList.Create;
+	Ini.ReadSection('videos', Videos);
 
-	for video in videos do
+	for Video in Videos do
 		for i := 1 to 10 do
 		begin
-			a := random(videos.count);
-			b := random(videos.count);
-			videos.exchange(a, b)
+			a := Random(Videos.Count);
+			b := Random(Videos.Count);
+			Videos.Exchange(a, b)
 		end;
 
-	titles := tstringlist.create;
+	Titles := TStringList.Create;
 
-	for video in videos do
+	for Video in Videos do
 	begin
-		titles.add(ini.readstring('videos', video, '???'));
-		ini.deletekey('videos', video)
+		Titles.Add(Ini.ReadString('videos', Video, '???'));
+		Ini.DeleteKey('videos', Video)
 	end;
 
-	for i := 0 to videos.count - 1 do
-		ini.writestring('videos', videos[i], titles[i]);
+	for i := 0 to Videos.Count - 1 do
+		Ini.WriteString('videos', Videos[i], Titles[i]);
 	
-	videos.free;
-	titles.free
+	Videos.Free;
+	Titles.Free
 end;
 
-procedure sortlist;
+procedure SortList;
 var
-	videos : tstringlist;
-	titles : tstringlist;
-	video  : string;
+	Videos : TStringList;
+	Titles : TStringList;
+	Video  : string;
 	i      : word;
 begin
-	videos := tstringlist.create;
-	titles := tstringlist.create;
+	Videos := TStringList.Create;
+	Titles := TStringList.Create;
 
-	ini.readsection('videos', videos);
+	Ini.ReadSection('videos', Videos);
 
-	videos.customsort(@comparetitles);
+	Videos.CustomSort(@CompareTitles);
 
-	for video in videos do
+	for Video in Videos do
 	begin
-		titles.add(ini.readstring('videos', video, '???'));
-		ini.deletekey('videos', video)
+		Titles.Add(Ini.ReadString('videos', Video, '???'));
+		Ini.DeleteKey('videos', Video)
 	end;
 
-	for i := 0 to videos.count - 1 do
-		ini.writestring('videos', videos[i], titles[i]);
+	for i := 0 to Videos.Count - 1 do
+		Ini.WriteString('videos', Videos[i], Titles[i]);
 	
-	videos.free;
-	titles.free
+	Videos.Free;
+	Titles.Free
 end;
 
-procedure savelist(fname : string);
+procedure SaveList(FName : String);
 var
-	listname : string;
-	video    : string;	
-	ch       : char;
-	videos   : tstringlist;
-	newini   : tinifile;
+	ListName : String;
+	Video    : String;	
+	Ch       : Char;
+	Videos   : TStringList;
+	NewIni   : TIniFile;
+	Ref      : Text;
 begin
-	listname := '';
+	ListName := '';
 
-	for ch in lowercase(fname) do
-		if ch in VALIDCHARS then
-			listname := concat(listname, ch);
+	for Ch in LowerCase(FName) do
+		if Ch in ValidChars then
+			ListName := Concat(ListName, Ch);
 
-	newini := tinifile.create('playlists/' + listname + '.ini');
-	newini.cacheupdates := TRUE;
-	newini.writestring('status', 'locked', 'false');
-
-	videos := tstringlist.create;
-	ini.readsection('videos', videos);
-
-	for video in videos do
-		newini.writestring('videos', video,
-			ini.readstring('videos', video, ''));
-
-	newini.updatefile;
-
-	newini.free;
-	videos.free
-end;
-
-procedure loadlist(fname : string);
-var
-	listname : string;
-	video    : string;
-	videos   : tstringlist;
-	newini   : tinifile;
-begin
-	listname := 'playlists/' + fname + '.ini';
-
-	if not fileexists(listname) then
-		halt;
-
-	newini := tinifile.create(listname);
-
-	videos := tstringlist.create;
-	newini.readsection('videos', videos);
-
-	for video in videos do
-		ini.writestring('videos', video,
-			newini.readstring('videos', video, '???'));
-
-	videos.free;
-	newini.free
-end;
-
-procedure movevideo(id1, id2 : string);
-var
-	video  : string;
-	videos : tstringlist;
-	titles : tstringlist;
-	a      : word;
-	b      : word;
-	e      : word;
-	i      : word;
-begin
-	videos := tstringlist.create;
-	titles := tstringlist.create;
-
-	ini.readsection('videos', videos);
-
-	for video in videos do
+	if FileExists('playlists/' + ListName +'.ini') then
 	begin
-		titles.add(ini.readstring('videos', video, '???'));
-		ini.deletekey('videos', video)
+		Assign(Ref, 'playlists/' + ListName + '.ini');
+		Erase(Ref)
 	end;
 
-	val(id1, a, e);
-	if not (e = 0) then
-		halt;
+	NewIni := TIniFile.Create('playlists/' + ListName + '.ini');
+	NewIni.CacheUpdates := True;
+	NewIni.WriteString('status', 'locked', 'false');
 
-	val(id2, b, e);
-	if not (e = 0) then
-		halt;
+	Videos := TStringList.Create;
+	Ini.ReadSection('videos', Videos);
 
-	video := videos[a];
-	videos.delete(a);
-	videos.insert(b, video);
+	for Video in Videos do
+		NewIni.WriteString('videos', Video,
+			Ini.ReadString('videos', Video, ''));
 
-	for i := 0 to videos.count - 1 do
-		ini.writestring('videos', videos[i], titles[i])
+	NewIni.UpdateFile;
+
+	NewIni.Free;
+	Videos.Free
 end;
 
-procedure removelist(fname : string);
+procedure LoadList(FName : String);
 var
-	listname : string;
-	ref      : text;
+	ListName : String;
+	Video    : String;
+	Videos   : TStringList;
+	NewIni   : TIniFile;
 begin
-	listname := 'playlists/' + fname + '.ini';
-	if not fileexists(listname) then
-		halt;
-	assign(ref, listname);
-	erase(ref)
+	ListName := 'playlists/' + FName + '.ini';
+
+	if not FileExists(ListName) then
+		Halt;
+
+	NewIni := TIniFile.Create(ListName);
+
+	Videos := TStringList.Create;
+	NewIni.ReadSection('videos', Videos);
+
+	for Video in Videos do
+		Ini.WriteString('videos', Video,
+			NewIni.ReadString('videos', Video, '???'));
+
+	Videos.Free;
+	NewIni.Free
 end;
 
-
+procedure MoveVideo(Id1, Id2 : String);
 var
-	query     : tstringarray;
-	sessionid : string;	
-	hostpass  : string;
-	locked    : boolean;
-	secure    : boolean;
-	ref       : text;
+	Video  : String;
+	Videos : TStringList;
+	Titles : TStringList;
+	a      : Word;
+	b      : Word;
+	e      : Word;
+	i      : Word;
 begin
-	writeln('Content-Type: text/javascript');
-	writeln;
+	Videos := TStringList.Create;
+	Titles := TStringList.Create;
 
-	query    := split(getenv('QUERY_STRING'), '&');
+	Ini.ReadSection('videos', Videos);
 
-	secure   := FALSE;
-	ini      := tinifile.create('settings.ini');
-	hostpass := ini.readstring('room', 'host-password', '');
-
-	assign(ref, 'session.id');
-	reset(ref);
-	readln(ref, sessionid);
-	close(ref);
-
-	sessionid := xordecode(hostpass, sessionid);
-	secure := (sessionid = query[0]);
-
-
-	ini    := tinifile.create('playlist.ini');
-	with ini do
+	for Video in Videos do
 	begin
-		cacheupdates := TRUE;
-		locked := (readstring('status', 'locked', 'true') = 'true')
+		Titles.Add(Ini.ReadString('videos', Video, '???'));
+		Ini.DeleteKey('videos', Video)
 	end;
 
-	case length(query) of
-		1: case query[0] of
-			'status': writestatus(locked);
-			'list'  : writeplaylists;
+	Val(Id1, a, e);
+	if not (e = 0) then
+		Halt;
+
+	Val(Id2, b, e);
+	if not (e = 0) then
+		Halt;
+
+	Video := Videos[a];
+	Videos.Delete(a);
+	Videos.Insert(b, Video);
+
+	for i := 0 to Videos.Count - 1 do
+		Ini.WriteString('videos', Videos[i], Titles[i])
+end;
+
+procedure RemoveList(FName : String);
+var
+	ListName : String;
+	Ref      : Text;
+begin
+	ListName := 'playlists/' + FName + '.ini';
+	if not FileExists(ListName) then
+		Halt;
+	Assign(Ref, ListName);
+	Erase(Ref)
+end;
+
+
+var
+	Query     : TStringArray;
+	SessionId : String;	
+	HostPass  : String;
+	Locked    : Boolean;
+	Secure    : Boolean;
+	Ref       : Text;
+begin
+	WriteLn('Content-Type: text/javascript');
+	WriteLn;
+
+	Query    := Split(GetEnv('QUERY_STRING'), '&');
+
+	Secure   := False;
+	Ini      := TIniFile.Create('settings.ini');
+	HostPass := Ini.ReadString('room', 'host-password', '');
+
+	Assign(Ref, 'session.id');
+	Reset(Ref);
+	ReadLn(Ref, SessionId);
+	Close(Ref);
+
+	SessionId := XorDecode(HostPass, SessionId);
+	Secure := (SessionId = Query[0]);
+
+
+	Ini    := TIniFile.Create('playlist.ini');
+	Ini.CacheUpdates := True;
+
+	locked := Ini.ReadString('status', 'locked', 'true') = 'true';
+
+	case Length(Query) of
+		1 : case Query[0] of
+			'status': WriteStatus(Locked);
+			'list'  : WritePlaylists;
 		end;
 
-		2: begin
-			case query[0] of
-				'add': if not locked then
-					addvideo(query[1])
+		2 : begin
+			case Query[0] of
+				'add': if not Locked then
+					AddVideo(Query[1])
 			end;
-			case query[1] of
-				'lock': if secure then
-					togglelock(TRUE);
-				'unlock': if secure then
-					togglelock(FALSE);
-				'clear': if secure then
-					clearlist;
-				'shuffle': if secure then
-					shufflelist;
-				'sort': if secure then
-					sortlist
+			case Query[1] of
+				'lock'    : if Secure then
+					ToggleLock(True);
+				'unlock'  : if Secure then
+					ToggleLock(False);
+				'clear'   : if Secure then
+					ClearList;
+				'shuffle' : if Secure then
+					ShuffleList;
+				'sort'    : if Secure then
+					SortList
 			end
 		end;
 
-		3: case query[1] of
-			'add': if secure then
-				addvideo(query[2]);
-			'delete': if secure then
-				deletevideo(query[2]);
-			'save': if secure then
-				savelist(query[2]);
-			'load': if secure then
-				loadlist(query[2]);
-			'remove': if secure then
-				removelist(query[2]);
-			'import': if secure then
-				importlist(query[2])
+		3 : case Query[1] of
+			'add'    : if Secure then
+				AddVideo(Query[2]);
+			'delete' : if Secure then
+				DeleteVideo(Query[2]);
+			'save'   : if Secure then
+				SaveList(Query[2]);
+			'load'   : if Secure then
+				LoadList(Query[2]);
+			'remove' : if Secure then
+				RemoveList(Query[2]);
+			'import' : if Secure then
+				ImportList(Query[2])
 		end;
-		4: case query[1] of
-			'move': if secure then
-				movevideo(query[2], query[3])
+		4 : case Query[1] of
+			'move' : if Secure then
+				MoveVideo(Query[2], Query[3])
 		end
 	end;
 
-	ini.updatefile;
-	ini.free
+	Ini.UpdateFile;
+	Ini.Free
 end.

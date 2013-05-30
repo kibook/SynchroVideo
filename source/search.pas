@@ -1,114 +1,122 @@
-uses dos, htmlutils, classes, inifiles, sysutils;
+uses
+	dos,
+	htmlutils,
+	classes,
+	inifiles,
+	sysutils;
 
-function checkvideo(room : string) : string;
+function CheckVideo(Room : String) : String;
 var
-	ini    : tinifile;
-	id     : string;
-	ref    : text;
+	Ini    : TIniFile;
+	Id     : String;
+	Ref    : Text;
 begin
-	assign(ref, '../' + room + '/syncvid.syn');
-	reset(ref);
-	readln(ref, id);
-	close(ref);
+	Assign(Ref, '../' + Room + '/syncvid.syn');
+	Reset(Ref);
+	ReadLn(Ref, Id);
+	Close(Ref);
 
-	ini := tinifile.create('../' + room + '/playlist.ini');
-	checkvideo := ini.readstring('videos', id, '???');
-	ini.free
+	Ini := TIniFile.Create('../' + Room + '/playlist.ini');
+	CheckVideo := Ini.ReadString('videos', Id, '???');
+	Ini.Free
 end;
 
 var
-	query       : thttpquery;
-	pair        : thttpquerypair;
-	searchterms : string = '';
-	each        : string;
-	password    : string;
-	roomname    : string;
-	roomtags    : string;
-	roomdesc    : string;
-	playing     : string;
-	rooms       : tstringlist;
-	ini         : tinifile;
-	match       : boolean;
-	priv        : boolean;
+	Query       : THttpQuery;
+	Pair        : THttpQueryPair;
+	SearchTerms : String = '';
+	Each        : String;
+	Password    : String;
+	RoomName    : String;
+	RoomTags    : String;
+	RoomDesc    : String;
+	Playing     : String;
+	Rooms       : TStringList;
+	Ini         : TIniFile;
+	Match       : Boolean;
+	Priv        : Boolean;
 
-procedure displayroom;
+procedure DisplayRoom;
 begin
-	if not priv then
+	if not Priv then
 	begin
-		write('<h3>');
-		write('<a href="../', each, '">');
-		write(roomname);
-		writeln('</a></h3>');
-		writeln('<p>', roomdesc, '</p>');
-		writeln('<p class="smalltext">',
-			'<em>Now Playing: <b>', playing, '</b></em>',
+		Write('<h3>');
+		Write('<a href="../', Each, '">');
+		Write(RoomName);
+		WriteLn('</a></h3>');
+		WriteLn('<p>', RoomDesc, '</p>');
+		WriteLn('<p class="smalltext">',
+			'<em>Now Playing: <b>', Playing, '</b></em>',
 			'</p>');
 	end
 end;
 
 begin
-	writeln('Content-Type: text/html');
-	writeln;
+	WriteLn('Content-Type: text/html');
+	WriteLn;
 
-	query := getquery(getrequest);
+	Query := GetQuery(GetRequest);
 
-	for pair in query do case pair[0] of
-		'q': searchterms := html2text(pair[1])
+	for Pair in Query do case Pair[0] of
+		'q': SearchTerms := Html2Text(Pair[1])
 	end;
 
-	if trim(searchterms) = '' then
+	if Trim(SearchTerms) = '' then
 	begin
-		redirect('../', 0);
-		halt
+		Redirect('../', 0);
+		Halt
 	end;
 	
-	ini := tinifile.create('../rooms.ini');
-	rooms := tstringlist.create;
-	with ini do
+	Ini   := TIniFile.Create('../rooms.ini');
+	Rooms := TStringList.Create;
+	with Ini do
 	begin
-		readsection('rooms', rooms);
-		free
+		ReadSection('rooms', Rooms);
+		Free
 	end;
 
-	writeln('<html>');
-	writeln('<head>');
-	writeln('<title>Search Results</title>');
-	writeln('<link rel="stylesheet" type="text/css" ',
+	WriteLn('<html>');
+	WriteLn('<head>');
+	WriteLn('<title>Search Results</title>');
+	WriteLn('<link rel="stylesheet" type="text/css" ',
 		'href="../general.css">');
-	writeln('</head>');
-	writeln('<body>');
-	writeln('<center>');
-	writeln('<a href="../">&lt;- Home</a>');
-	writeln('<h1><u>Room Search</u></h1>');
-	writeln('<p>Results for "', searchterms, '"</p>');
-	writeln('<form action="./" method="GET">');
-	writeln('<input type="text" size"30" name="q">');
-	writeln('<input type="submit" value="Search">');
-	writeln('</form>');
-	writeln('<hr width="50%" noshade>');
+	WriteLn('</head>');
+	WriteLn('<body>');
+	WriteLn('<center>');
+	WriteLn('<a href="../">&lt;- Home</a>');
+	WriteLn('<h1><u>Room Search</u></h1>');
+	WriteLn('<p>Results for "', SearchTerms, '"</p>');
+	WriteLn('<form action="./" method="GET">');
+	WriteLn('<input type="text" size"30" name="q">');
+	WriteLn('<input type="submit" value="Search">');
+	WriteLn('</form>');
+	WriteLn('<hr width="50%" noshade>');
 
-	for each in rooms do
+	for Each in Rooms do
 	begin
-		ini := tinifile.create('../' + each + '/settings.ini');
-		password := ini.readstring('room', 'password', '');
-		priv := length(password) > 1;
-		with ini do
-		begin
-			roomname := readstring('room', 'name', '');
-			roomtags := readstring('room', 'tags', '');
-			roomdesc := readstring('room', 'description', '');
-			playing  := checkvideo(each);
-			free
-		end;
-		match := (pos(upcase(searchterms), upcase(each))     > 0) or
-			 (pos(upcase(searchterms), upcase(roomname)) > 0) or
-			 (pos(upcase(searchterms), upcase(roomtags)) > 0) or
-			 (pos(upcase(searchterms), upcase(playing))  > 0);
-		if match then
-			displayroom
+		Ini := TIniFile.Create('../' + Each + '/settings.ini');
+
+		Password := Ini.ReadString('room', 'password', '');
+
+		Priv     := Length(Password) > 1;
+
+		RoomName := Ini.ReadString('room', 'name', '');
+		RoomTags := Ini.ReadString('room', 'tags', '');
+		RoomDesc := Ini.ReadString('room', 'description', '');
+
+		Ini.Free;
+
+		Playing := CheckVideo(Each);
+
+		Match := (Pos(UpCase(SearchTerms), UpCase(Each))     > 0) or
+			 (Pos(UpCase(SearchTerms), UpCase(RoomName)) > 0) or
+			 (Pos(UpCase(SearchTerms), UpCase(RoomTags)) > 0) or
+			 (Pos(UpCase(SearchTerms), UpCase(Playing))  > 0);
+		if Match then
+			DisplayRoom
 	end;
 
-	writeln('</center>');
-	writeln('</body>');
-	writeln('</html>')
+	WriteLn('</center>');
+	WriteLn('</body>');
+	WriteLn('</html>')
 end.

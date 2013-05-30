@@ -1,80 +1,80 @@
-uses classes, inifiles;
+uses
+	classes,
+	inifiles;
 
-const
-	PAGETITLE = 'SynchroVideo';
 var
-	rooms : tstringlist;
-	ini   : tinifile;
-	pub   : integer = 0;
-	priv  : integer = 0;
-	room  : string;
+	Rooms : TStringList;
+	Ini   : TIniFile;
+	Pub   : Integer = 0;
+	Priv  : Integer = 0;
+	Room  : String;
 begin
-	writeln('Content-Type: text/html');
-	writeln;
+	WriteLn('Content-Type: text/html');
+	WriteLn;
 
-	writeln('<html>');
-	writeln('<head>');
-	writeln('<title>', PAGETITLE, '</title>');
-	writeln('<link rel="stylesheet" type="text/css" ',
+	WriteLn('<html>');
+	WriteLn('<head>');
+	WriteLn('<title>SynchroVideo</title>');
+	WriteLn('<link rel="stylesheet" type="text/css" ',
 		'href="general.css">');
-	writeln('<link rel="stylesheet" type="text/css" ',
+	WriteLn('<link rel="stylesheet" type="text/css" ',
 		'href="index.css">');
-	writeln('<link rel="icon" href="res/favicon.gif">');
-	writeln('</head>');
-	writeln('<body>');
+	WriteLn('<link rel="icon" href="res/favicon.gif">');
+	WriteLn('</head>');
+	WriteLn('<body>');
 
-	writeln('<div class="header">');
-	writeln('<img src="res/logo.png" alt="SynchroVideo">');
-	writeln('</div>');
-	writeln('<hr width="50%" noshade>');
+	WriteLn('<div class="header">');
+	WriteLn('<img src="res/logo.png" alt="SynchroVideo">');
+	WriteLn('</div>');
+	WriteLn('<hr width="50%" noshade>');
 
-	writeln('<center>');
-	writeln('<table cellpadding="10" cellspacing="10">');
-	writeln('<tr>');
-	writeln('<td class="link"><a href="info">Information</a></td>');
-	writeln('<td class="link"><a href="new">Create Room</a></td>');
-	writeln('<td class="link"><a href="source.htm">',
+	WriteLn('<center>');
+	WriteLn('<table cellpadding="10" cellspacing="10">');
+	WriteLn('<tr>');
+	WriteLn('<td class="link"><a href="info">Information</a></td>');
+	WriteLn('<td class="link"><a href="new">Create Room</a></td>');
+	WriteLn('<td class="link"><a href="source.htm">',
 		'View Source</a></td>');
-	writeln('</tr>');
-	writeln('</table>');
-	writeln('</center>');
+	WriteLn('</tr>');
+	WriteLn('</table>');
+	WriteLn('</center>');
 
-	writeln('<div class="section">');
+	WriteLn('<div class="section">');
 
-	ini   := tinifile.create('rooms.ini');
-	rooms := tstringlist.create;
-	ini.readsection('rooms', rooms);
-	ini.free;
+	Ini   := TIniFile.Create('rooms.ini');
+	Rooms := TStringList.Create;
+	Ini.ReadSection('rooms', Rooms);
+	Ini.Free;
 
-	for room in rooms do
+	for Room in Rooms do
 	begin
-		ini := tinifile.create(room + '/settings.ini');
-		if ini.readstring('room', 'password', '') = '' then
-			inc(pub)
+		Ini := TIniFile.Create(Room + '/settings.ini');
+		if Ini.ReadString('room', 'password', '') = '' then
+			Inc(Pub)
 		else
-			inc(priv)
+			Inc(Priv)
 	end;
 
-	writeln('<h2><u>Welcome to SynchroVideo!</u></h2>');
+	WriteLn('<h2><u>Welcome to SynchroVideo!</u></h2>');
 
-	writeln('<div class="subsection">');
-	writeln('<p>Now serving ', rooms.count, ' rooms!</p>');
-	writeln('<p>(', pub, ' public and ', priv, ' private)</p>');
-	writeln('</div>');
+	WriteLn('<div class="subsection">');
+	WriteLn('<p>Now serving ', Rooms.Count, ' rooms!</p>');
+	WriteLn('<p>(', Pub, ' public and ', Priv, ' private)</p>');
+	WriteLn('</div>');
 
-	writeln('</div>');
+	WriteLn('</div>');
 
-	writeln('<div class="section">');
-	writeln('<h3>Search for rooms:');
-	writeln('<form action="search" method="GET">');
-	writeln('<p><input type="text" size="30" name="q"></p>');
-	writeln('<p><input type="submit" value="Search"></p>');
-	writeln('</form>');
-	writeln('<div class="subsection">');
-	writeln('<a href="list">Full Room List</a>');
-	writeln('</div>');
-	writeln('</div>');
+	WriteLn('<div class="section">');
+	WriteLn('<h3>Search for rooms:');
+	WriteLn('<form action="search" method="GET">');
+	WriteLn('<p><input type="text" size="30" name="q"></p>');
+	WriteLn('<p><input type="submit" value="Search"></p>');
+	WriteLn('</form>');
+	WriteLn('<div class="subsection">');
+	WriteLn('<a href="list">Full Room List</a>');
+	WriteLn('</div>');
+	WriteLn('</div>');
 
-	writeln('</body>');
-	writeln('</html>')
+	WriteLn('</body>');
+	WriteLn('</html>')
 end.

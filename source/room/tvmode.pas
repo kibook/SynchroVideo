@@ -1,41 +1,44 @@
-uses dos, strarrutils, inifiles, strutils, process;
+uses
+	dos,
+	strarrutils,
+	inifiles,
+	strutils,
+	process;
+
 var
-	ini       : tinifile;
-	ref       : text;
-	sessionid : string;
-	hostpass  : string;
-	request   : string;
-	server    : tprocess;
+	Ini       : TIniFile;
+	Ref       : Text;
+	SessionId : String;
+	HostPass  : String;
+	Request   : String;
+	Server    : TProcess;
 begin
-	writeln('Content-Type: text/javascript');
-	writeln;
+	WriteLn('Content-Type: text/javascript');
+	WriteLn;
 
-	request := getenv('QUERY_STRING');
+	Request := GetEnv('QUERY_STRING');
 
-	ini := tinifile.create('settings.ini');
-	with ini do
+	Ini := TIniFile.Create('settings.ini');	
+	HostPass := Ini.ReadString('room', 'host-password', '');
+	Ini.Free;
+
+	Assign(Ref, 'session.id');
+	Reset(Ref);
+	ReadLn(Ref, SessionId);
+	Close(Ref);
+
+	SessionId := XorDecode(HostPass, SessionId);
+
+	if Request = SessionId then
 	begin
-		hostpass := readstring('room', 'host-password', '');
-		free
-	end;
-
-	assign(ref, 'session.id');
-	reset(ref);
-	readln(ref, sessionid);
-	close(ref);
-
-	sessionid := xordecode(hostpass, sessionid);
-
-	if request = sessionid then
-	begin
-		server := tprocess.create(NIL);
+		Server := TProcess.Create(Nil);
 		{$ifdef unix}
-			server.executable := './tvserver';
+			Server.Executable := './tvserver';
 		{$endif}
 		{$ifdef win32}
-			server.executable := 'tvserver.exe';
+			Server.Executable := 'tvserver.exe';
 		{$endif}
-		server.options := [pousepipes];
-		server.execute
+		Server.Options := [poUsePipes];
+		Server.Execute
 	end
 end.

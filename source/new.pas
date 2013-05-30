@@ -1,173 +1,179 @@
 {$mode objfpc}
-uses fpwritepng, fpimage, fpcanvas, fpimgcanv, ftfont, base64,
-	inifiles, classes;
+
+uses
+	fpwritepng,
+	fpimage,
+	fpcanvas,
+	fpimgcanv,
+	ftfont,
+	base64,
+	inifiles,
+	classes;
 
 const
-	CAPTCHADIR = 'res/captcha/';
-	CHARS = '0123456789abcdefghijklmnopqrstuvwxyz';
+	CaptchaDir = 'res/captcha/';
+	Chars      = '0123456789abcdefghijklmnopqrstuvwxyz';
 
 type
-	tcanvas = class(tfpimagecanvas)
+	TCanvas = class(TFPImageCanvas)
 	protected
-		procedure docopyrect(x, y : integer;
-			canvas : tfpcustomcanvas;
-			const sourcerect : trect); override;
-		procedure dodraw(x, y : integer;
-			const img : tfpcustomimage); override;
+		procedure DoCopyRect(x, y : Integer;
+			Canvas : TFPCustomCanvas;
+			const SourceRect : TRect); override;
+		procedure DoDraw(x, y : Integer;
+			const Img : TFPCustomImage); override;
 	end;
 
-procedure tcanvas.docopyrect(x, y : integer; canvas : tfpcustomcanvas;
-	const sourcerect : trect);
+procedure TCanvas.DoCopyRect(x, y : Integer; Canvas : TFPCustomCanvas;
+	const SourceRect : TRect);
 begin
 end;
 
-procedure tcanvas.dodraw(x, y : integer; const img : tfpcustomimage);
+procedure TCanvas.DoDraw(x, y : Integer; const Img : TFPCustomImage);
 begin
 end;
 
 var
-	image      : tfpcustomimage;
-	canvas     : tcanvas;
-	writer     : tfpcustomimagewriter;
-	afont      : tfreetypefont;
-	content    : ansistring;
-	captchatxt : string;
-	key        : string;
-	id         : string;
-	ini        : tinifile;
-	achar      : char;
-	ref        : text;
-	allow      : boolean;
-	i          : integer;
-	x          : integer;
-	y          : integer;
-	x1         : integer;
-	y1         : integer;
-	x2         : integer;
-	y2         : integer;
+	Image      : TFPCustomImage;
+	Canvas     : TCanvas;
+	Writer     : TFPCustomImageWriter;
+	AFont      : TFreeTypeFont;
+	Content    : AnsiString;
+	CaptchaTxt : String;
+	Key        : String;
+	Id         : String;
+	Ini        : TIniFile;
+	AChar      : Char;
+	Ref        : Text;
+	Allow      : Boolean;
+	i          : Integer;
+	x          : Integer;
+	y          : Integer;
+	x1         : Integer;
+	y1         : Integer;
+	x2         : Integer;
+	y2         : Integer;
 begin
-	writeln('Content-Type: text/html');
-	writeln;
+	WriteLn('Content-Type: text/html');
+	WriteLn;
 
-	randomize;
+	Randomize;
 
-	image := tfpmemoryimage.create(132, 46);
+	Image := TFPMemoryImage.Create(132, 46);
 	
-	canvas := tcanvas.create(image);
+	Canvas := TCanvas.Create(Image);
 
-	ftfont.initengine;
-	fontmgr.searchpath := '/Library/Fonts/';
-	afont := tfreetypefont.create;
+	FTFont.InitEngine;
+	FontMgr.SearchPath := '/Library/Fonts/';
+	AFont := TFreeTypeFont.Create;
 
-	ini   := tinifile.create('rooms.ini');
-	key   := ini.readstring('security', 'key', '');
-	allow := ini.readstring('security', 'allownew', 'false') = 'true';
-	ini.free;
+	Ini   := TIniFile.Create('rooms.ini');
+	Key   := Ini.ReadString('security', 'key', '');
+	Allow := Ini.ReadString('security', 'allownew', 'false') = 'true';
+	Ini.Free;
 
-	writeln('<html>');
-	writeln('<head>');
-	writeln('<title>Create New Room</title>');
-	writeln('<link rel="stylesheet" type="text/css" ',
+	WriteLn('<html>');
+	WriteLn('<head>');
+	WriteLn('<title>Create New Room</title>');
+	WriteLn('<link rel="stylesheet" type="text/css" ',
 		'href="general.css">');
-	writeln('</head>');
-	writeln('<body>');
-	writeln('<center>');
-	writeln('<a href="./">&lt;- Home</a>');
+	WriteLn('</head>');
+	WriteLn('<body>');
+	WriteLn('<center>');
+	WriteLn('<a href="./">&lt;- Home</a>');
 
-	if not allow then
+	if not Allow then
 	begin
-		writeln('<h1>Error!</h1>');
-		writeln('Room creation is disabled');
-		redirect('./', 2);
+		WriteLn('<h1>Error!</h1>');
+		WriteLn('Room creation is disabled');
+		Redirect('./', 2);
 		halt
 	end;
 
-	randomize;
-	captchatxt := '';
+	Randomize;
+	CaptchaTxt := '';
 	for i := 1 to 5 do
-		captchatxt := captchatxt+CHARS[random(length(CHARS))+1];
-	x  := random(image.width div 3);
-	y  := random(image.height div 2) + image.height div 2;
+		CaptchaTxt := CaptchaTxt+Chars[Random(Length(Chars))+1];
+	x  := Random(Image.Width  div 3);
+	y  := Random(Image.Height div 2) + Image.Height div 2;
 
-	with canvas do
-	begin
-		brush.fpcolor := colwhite;
-		brush.style := bssolid;
-		rectangle(0, 0, image.width - 1, image.height - 1);
+	Canvas.Brush.FPColor := colWhite;
+	Canvas.Brush.Style   := bsSolid;
+	Canvas.Rectangle(0, 0, Image.Width - 1, Image.Height - 1);
 
-		font := afont;
+	Canvas.Font := AFont;
 
-		case random(2) of
-			0 : font.name := 'TI Uni Regular';
-			1 : font.name := 'Arial'
-		end;
-
-		font.size := 20;
-
-		textout(x, y, captchatxt);
-
-		for i := 1 to 12 do
-		begin
-			x1 := random(image.width);
-			y1 := random(image.height);
-			x2 := random(image.width);
-			y2 := random(image.height);
-			line(x1,y1,x2,y2)
-		end
+	case Random(2) of
+		0 : Canvas.Font.Name := 'TI Uni Regular';
+		1 : Canvas.Font.Name := 'Arial'
 	end;
 
-	str(random($FF), id);
-	writer := tfpwriterpng.create;
-	image.savetofile(CAPTCHADIR+id+'.png', writer);
+	Canvas.TextOut(x, y, CaptchaTxt);
 
-	content := '';
-	assign(ref, CAPTCHADIR+id+'.png');
-	reset(ref);
+	for i := 1 to 12 do
+	begin
+		x1 := Random(Image.Width);
+		y1 := Random(Image.Height);
+		x2 := Random(Image.Width);
+		y2 := Random(Image.Height);
+		Canvas.Line(x1, y1, x2, y2)
+	end;
+
+	Str(Random($FF), Id);
+	Writer := TFPWriterPng.Create;
+	Image.SaveToFile(CaptchaDir + Id + '.png', Writer);
+
+	Content := '';
+
+	Assign(Ref, CaptchaDir + Id + '.png');
+	Reset(Ref);
+
 	repeat
-		read(ref, achar);
-		content := concat(content, achar)
-	until eof(ref);
-	close(ref);
-	erase(ref);
+		read(Ref, AChar);
+		Content := Concat(Content, AChar)
+	until EOF(Ref);
 
-	content := encodestringbase64(content);
+	Close(Ref);
+	Erase(Ref);
 
-	writeln('<h1>New Room</h1>');
+	Content := EncodeStringBase64(Content);
 
-	writeln('<form action="createroom.cgi" method="POST">');
-	writeln('<input type="hidden" name="check" value="', id, '">');
-	writeln('<p><b>CAPTCHA:</b></p>');
-	writeln('<p><img src="data:image/png;base64,', content, '"></p>');
-	writeln('<p class="smalltext">',
+	WriteLn('<h1>New Room</h1>');
+
+	WriteLn('<form action="createroom.cgi" method="POST">');
+	WriteLn('<input type="hidden" name="check" value="', Id, '">');
+	WriteLn('<p><b>CAPTCHA:</b></p>');
+	WriteLn('<p><img src="data:image/png;base64,', Content, '"></p>');
+	WriteLn('<p class="smalltext">',
 		'Type in the letters and numbers above:</p>');
-	writeln('<p><input type="text" name="solve"></p>');
-	writeln('<table cellpadding="2">');
-	writeln('<tr>');
-	writeln('<td>Room Name:</td>');
-	writeln('<td><input type="text" name="room"></td>');
-	writeln('</tr><tr>');
-	writeln('<td>Host Pass:</td>');
-	writeln('<td><input type="password" name="pass"></td>');
-	writeln('</tr><tr>');
-	writeln('<td><input type="button" value="Reset" ',
+	WriteLn('<p><input type="text" name="solve"></p>');
+	WriteLn('<table cellpadding="2">');
+	WriteLn('<tr>');
+	WriteLn('<td>Room Name:</td>');
+	WriteLn('<td><input type="text" name="room"></td>');
+	WriteLn('</tr><tr>');
+	WriteLn('<td>Host Pass:</td>');
+	WriteLn('<td><input type="password" name="pass"></td>');
+	WriteLn('</tr><tr>');
+	WriteLn('<td><input type="button" value="Reset" ',
 		'onclick="location.reload(true)"></td>');
-	writeln('<td><input type="submit"></td>');
-	writeln('</tr></table>');
-	writeln('</form>');
+	WriteLn('<td><input type="submit"></td>');
+	WriteLn('</tr></table>');
+	WriteLn('</form>');
 
-	writeln('<p><a href="info/#create">',
+	WriteLn('<p><a href="info/#create">',
 		'How do I create a room?</a></p>');
 
-	writeln('</center>');
-	writeln('</body>');
-	writeln('</html>');
+	WriteLn('</center>');
+	WriteLn('</body>');
+	WriteLn('</html>');
 
-	assign(ref, CAPTCHADIR+id+'.cap');
-	rewrite(ref);
-	writeln(ref, captchatxt);
-	close(ref);
+	Assign(Ref, CaptchaDir + Id + '.cap');
+	Rewrite(Ref);
+	WriteLn(Ref, CaptchaTxt);
+	Close(Ref);
 
-	writer.free;
-	canvas.free;
-	image.free
+	Writer.Free;
+	Canvas.Free;
+	Image.Free
 end.

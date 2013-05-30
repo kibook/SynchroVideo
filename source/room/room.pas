@@ -1,396 +1,432 @@
-uses dos,strarrutils, inifiles, sysutils, classes, strutils, htmlutils;
+uses
+	dos,
+	strarrutils,
+	inifiles,
+	sysutils,
+	classes,
+	strutils,
+	htmlutils;
 
 const
-	DEFTITLE = 'Sync Vid';
-	JSFILE   = 'room.js';
-	DEFVIDEO = 'YTu-ctARF2w';
+	DefTitle = 'Sync Vid';
+	JSFile   = 'room.js';
+	DefVideo = 'YTu-ctARF2w';
 
-function nameformat(const roomname : string) : string;
+function NameFormat(const RoomName : String) : String;
 begin
-	nameformat := lowercase(roomname);
-	nameformat := stringreplace(nameformat, ' ', '-', [rfreplaceall])
+	NameFormat := LowerCase(RoomName);
+	NameFormat := StringReplace(NameFormat, ' ', '-', [rfReplaceAll])
 end;
 
 var
-	ini        : tinifile;
-	params     : thttpquery;
-	query      : thttpquerypair;
-	sessionkey : string;
-	roomscript : string;
-	roomstyle  : string;
-	sessionid  : string;
-	pagetitle  : string;
-	password   : string;
-	hostpass   : string;
-	roomdesc   : string;
-	favicon    : string;
-	videoid    : string;
-	ircconf    : string;
-	banner     : string;
-	authuser   : boolean = FALSE;
-	ishost     : boolean = FALSE;
-	ref        : text;
+	Ini        : TIniFile;
+	Params     : THttpQuery;
+	Query      : THttpQueryPair;
+	SessionKey : String;
+	RoomScript : String;
+	RoomStyle  : String;
+	SessionId  : String;
+	PageTitle  : String;
+	Password   : String;
+	HostPass   : String;
+	RoomDesc   : String;
+	Favicon    : String;
+	VideoId    : String;
+	IrcConf    : String;
+	Banner     : String;
+	AuthUser   : Boolean = False;
+	IsHost     : Boolean = False;
+	Ref        : Text;
+
+procedure DrawVideo;
 begin
-	writeln('Content-Type: text/html');
-	writeln;
-
-	ini := tinifile.create('settings.ini');
-
-	with ini do
-	begin
-		password   := readstring('room', 'password',      '');
-		hostpass   := readstring('room', 'host-password', '');
-		pagetitle  := readstring('room', 'name',    DEFTITLE);
-		videoid    := readstring('room', 'video',   DEFVIDEO);
-		banner     := readstring('room', 'banner',        '');
-		ircconf    := readstring('room', 'irc-settings',  '');
-		roomdesc   := readstring('room', 'description',   '');
-		favicon    := readstring('room', 'favicon',       '');
-		roomscript := readstring('room', 'script',        '');
-		roomstyle  := readstring('room', 'style',         '');
-
-		free
-	end;
-
-	if videoid = '' then
-		videoid := DEFVIDEO;
-	
-	if favicon = '' then
-		favicon := '../res/favicon.gif';
-
-	params := getquery(getrequest);
-
-	writeln('<html>');
-	writeln('<head>');
-	writeln('<meta charset="utf-8">');
-	writeln('<title>', pagetitle, '</title>');
-
-	writeln('<link rel="stylesheet" type="text/css" ',
-		'href="../general.css">');
-	writeln('<link rel="stylesheet" type="text/css" ',
-		'href="../room.css">');
-
-	writeln('<link rel="icon" href="', favicon, '">');
-
-	writeln('</head>');
-	writeln('<body>');
-	writeln('<center>');
-	
-	for query in params do case query[0] of
-		'host': if
-			not (query[1] = '') and
-			(query[1] = hostpass)
-		then
-			ishost := TRUE
-		else begin
-			writeln('<h1>Error!</h1>');
-			writeln('Password Invalid');
-			redirect('./', 3);
-			halt(0)
-		end;
-		'password': if
-			not (query[1] = '') and
-			(query[1] = password)
-		then
-			authuser := TRUE
-	end;
-	
-	if not (password = '') and not (authuser or ishost) then
-	begin
-		writeln('<h1>Error!</h1>');
-		writeln('Private room requires a password');
-		redirect('private.cgi', 1);
-		halt(0)
-	end;
-	
-	writeln('<p>');
-	writeln('<a href="../">&lt;- Home</a>');
-	writeln('</p>');
-
-	if not (banner = '') then
-	begin
-		writeln('<p>');
-		writeln('<img width="1000" height="300" src="',
-			banner, '">');
-		writeln('</p>')
-	end;
-	
-	if roomdesc <> '' then
-		writeln('<div id="description">', roomdesc, '</div>');
-
-	writeln('<table cellpadding="5" style="width:95%">');
-	writeln('<tr>');
-	writeln('<td width="50%">');
-
-	writeln('<object id="movie_container">');
-	writeln('<param name="movie" value="http://www.youtube.com/v/',
-		videoid, '?enablejsapi=1&amp;version=3&autoplay=1">',
+	WriteLn('<object id="movie_container">');
+	WriteLn('<param id="movie_params" name="movie" ',
+		'value="http://www.youtube.com/v/', VideoId,
+		'?enablejsapi=1&amp;version=3&autoplay=1">',
 		'</param>');
-	writeln('<param name="allowFullScreen" value="true"></param>');
-	writeln('<param name="allowscriptaccess" value="always"></param>');
-	writeln('<embed src="http://www.youtube.com/v/',
-		videoid, '?enablejsapi=1&amp;version=3&autoplay=1"',
+	WriteLn('<param name="allowFullScreen" value="true"></param>');
+	WriteLn('<param name="allowscriptaccess" value="always"></param>');
+	WriteLn('<embed src="http://www.youtube.com/v/',
+		VideoId, '?enablejsapi=1&amp;version=3&autoplay=1"',
 		'type="application/x-shockwave-flash" width="640"',
 		'height="450" allowscriptaccess="always"',
 		'allowfullscreen="true" id="movie_player"></embed>');
-	writeln('</object>');
+	WriteLn('</object>')
+end;
 
-	writeln('</td>');
-	writeln('<td width="50%">');
-	
-	writeln('<b>Playlist</b>&nbsp;');
-	writeln('<span id="playlistcount"></span>');
-	writeln('<br>');
-	writeln('<div id="playlistvideos"></div>');
+procedure DrawPlaylist;
+begin
+	WriteLn('<b>Playlist</b>&nbsp;');
+	WriteLn('<span id="playlistcount"></span>');
+	WriteLn('<br>');
+	WriteLn('<div id="playlistvideos"></div>')
+end;
 
-	writeln('</td>');
-	writeln('</tr>');
-	writeln('<tr>');
-	writeln('<td>');
-
-	writeln('<iframe width="640" height="330" scrolling="no" ',
+procedure DrawChat;
+begin
+	WriteLn('<iframe width="640" height="330" scrolling="no" ',
 		'frameborder="0" ',
 		'id="chat" src="http://kibj.nprog.ru:9090?',
-		'prompt=1&channels=', nameformat(pagetitle),
-		'&uio=', ircconf, '&nick=unnamed.."></iframe>');
+		'prompt=1&channels=', NameFormat(PageTitle),
+		'&uio=', IrcConf, '&nick=unnamed.."></iframe>')
+end;
 
-	writeln('</td>');
-	writeln('<td>');
-
-	writeln('<center>');
+procedure DrawControls;
+begin
+	WriteLn('<center>');
 	
-	writeln('<b>Playlist Controls</b><br>');
-	writeln('<span id="lock"></span>');
-	writeln('<span id="tvmode"></span>');
-	writeln('<br>');
+	WriteLn('<b>Playlist Controls</b><br>');
+	WriteLn('<span id="lock"></span>');
+	WriteLn('<span id="tvmode"></span>');
+	WriteLn('<br>');
 
-	if ishost then
+	if IsHost then
 	begin
-		writeln('<table cellpadding="5">');		
-		writeln('<tr>');
+		WriteLn('<table cellpadding="5">');		
+		WriteLn('<tr>');
 
-		writeln('<td class="btn">');
-		writeln('&nbsp;<input type="button" ',
+		WriteLn('<td class="btn">');
+		WriteLn('&nbsp;<input type="button" ',
 			'value="Clear" ',
 			'onclick="clearPlaylist();">');
-		writeln('</td>');
+		WriteLn('</td>');
 
-		writeln('<td class="btn">');
-		writeln('&nbsp;<input type="button" ',
+		WriteLn('<td class="btn">');
+		WriteLn('&nbsp;<input type="button" ',
 			'value="Lock" ',
 			'onclick="lockPlaylist();">');
-		writeln('</td>');
+		WriteLn('</td>');
 
-		writeln('<td class="btn">');
-		writeln('&nbsp;<input type="button" ',
+		WriteLn('<td class="btn">');
+		WriteLn('&nbsp;<input type="button" ',
 			'value="Unlock" ',
 			'onclick="unlockPlaylist();">');
-		writeln('</td>');
+		WriteLn('</td>');
 
-		writeln('</tr>');
-		writeln('<tr>');
+		WriteLn('</tr>');
+		WriteLn('<tr>');
 
-		writeln('<td class="btn">');
-		writeln('&nbsp;<input type="button" ',
+		WriteLn('<td class="btn">');
+		WriteLn('&nbsp;<input type="button" ',
 			'value="Shuffle" ',
 			'onclick="shufflePlaylist();">');
-		writeln('</td>');
+		WriteLn('</td>');
 
-		writeln('<td class="btn">');
-		writeln('&nbsp;<input type="button" ',
+		WriteLn('<td class="btn">');
+		WriteLn('&nbsp;<input type="button" ',
 			'value="Random" ',
 			'onclick="playRandom();">');
-		writeln('</td>');
+		WriteLn('</td>');
 
-		writeln('<td class="btn">');
-		writeln('&nbsp;<input type="button" ',
+		WriteLn('<td class="btn">');
+		WriteLn('&nbsp;<input type="button" ',
 			'value="Sort" ',
 			'onclick="sortPlaylist();">');
-		writeln('</td>');
+		WriteLn('</td>');
 
-		writeln('</tr>');
+		WriteLn('</tr>');
 	
-		writeln('<tr>');
-		writeln('<td></td>');
-		writeln('<td>');
-		writeln('<input type="button" ',
+		WriteLn('<tr>');
+		WriteLn('<td></td>');
+		WriteLn('<td>');
+		WriteLn('<input type="button" ',
 			'value="TV Mode" ',
 			'onclick="startTvMode();">');
-		writeln('</td><td>');
-		writeln('</td>');
-		writeln('</tr>');
+		WriteLn('</td><td>');
+		WriteLn('</td>');
+		WriteLn('</tr>');
 
-		writeln('</table>')
+		WriteLn('</table>')
 	end;
 	
-	writeln('<table>');
-	writeln('<tr>');
-	writeln('<td>Add:</td>');
-	writeln('<td><input type="text" id="addvideo"></td>');
-	writeln('<td><input type="button" onclick="btnAddVideo();" ',
+	WriteLn('<table>');
+	WriteLn('<tr>');
+	WriteLn('<td>Add:</td>');
+	WriteLn('<td><input type="text" id="addvideo"></td>');
+	WriteLn('<td><input type="button" onclick="btnAddVideo();" ',
 		'value="Add"></td>');
-	writeln('</table>');
+	WriteLn('</table>');
 
-	writeln('<div id="addwait">Adding video...</div>');
+	WriteLn('<div id="addwait">Adding video...</div>');
 
-	writeln('<br>');
+	WriteLn('<br>');
 
-	if ishost then
+	if IsHost then
 	begin
-		writeln('<table>');
-		writeln('<tr>');
-		writeln('<td>List:</td>');
-		writeln('<td><input type="text" id="listname"></td>');
-		writeln('</tr><tr>');
-		writeln('<td></td>');
-		writeln('<td><select id="playlists" ',
+		WriteLn('<table>');
+		WriteLn('<tr>');
+		WriteLn('<td>List:</td>');
+		WriteLn('<td><input type="text" id="listname"></td>');
+		WriteLn('</tr><tr>');
+		WriteLn('<td></td>');
+		WriteLn('<td><select id="playlists" ',
 			'onchange="selectPlaylist();">');
-		writeln('<option value="">--none--</option>');
-		writeln('</select></td>');
-		writeln('</tr>');
-		writeln('</table>');
+		WriteLn('<option value="">--none--</option>');
+		WriteLn('</select></td>');
+		WriteLn('</tr>');
+		WriteLn('</table>');
 
-		writeln('<table>');
-		writeln('<tr>');
-		writeln('<td><input type="button" ',
+		WriteLn('<table>');
+		WriteLn('<tr>');
+		WriteLn('<td><input type="button" ',
 			'onclick="btnLoadList();" value="Load"></td>');
-		writeln('<td><input type="button" ',
+		WriteLn('<td><input type="button" ',
 			'onclick="btnSaveList();" value="Save"></td>');
-		writeln('<td><input type="button" ',
+		WriteLn('<td><input type="button" ',
 			'onclick="btnRemoveList();" value="Delete"></td>');
-		writeln('<td><input type="button" ',
+		WriteLn('<td><input type="button" ',
 			'onclick="btnImportList();" value="Import"></td>');
-		writeln('</tr>');
-		writeln('</table>');
+		WriteLn('</tr>');
+		WriteLn('</table>');
 
-		writeln('<div id="importwait">',
+		WriteLn('<div id="importwait">',
 			'Importing playlist...</div>');
-		writeln('<br>')
+		WriteLn('<br>')
 	end;
 
-	writeln('</center>');	
+	WriteLn('</center>')
+end;	
 
-	writeln('</td>');
-	writeln('</tr>');
-	writeln('</table>');
+begin
+	WriteLn('Content-Type: text/html');
+	WriteLn;
 
-	writeln('<h3>Settings</h3>');
+	Ini := TIniFile.Create('settings.ini');
 
-	writeln('<p>');
+	Password   := Ini.ReadString('room', 'password',      '');
+	HostPass   := Ini.ReadString('room', 'host-password', '');
+	PageTitle  := Ini.ReadString('room', 'name',    DefTitle);
+	VideoId    := Ini.ReadString('room', 'video',   DefVideo);
+	Banner     := Ini.ReadString('room', 'banner',        '');
+	IrcConf    := Ini.ReadString('room', 'irc-settings',  '');
+	RoomDesc   := Ini.ReadString('room', 'description',   '');
+	Favicon    := Ini.ReadString('room', 'favicon',       '');
+	RoomScript := Ini.ReadString('room', 'script',        '');
+	RoomStyle  := Ini.ReadString('room', 'style',         '');
 
-	writeln('Video Size:&nbsp;');
-	writeln('<select id="videosize" ',
-		'onchange="changeVideoSize();">');
-	writeln('<option value="small">small</option>');
-	writeln('<option value="normal" selected="selected">normal',
-		'</option>');
-	writeln('<option value="large">large</option>');
-	writeln('</select>&nbsp;');
+	Ini.Free;
 
-	write('<span style="display:');
-	if ishost then
-		write('none')
-	else
-		write('inline-block');
-	writeln(';">');
-
-	writeln('Synchronize:&nbsp;');
-	write('<input type="checkbox" id="syncselect" ',
-		'onchange="changeSync();" checked>&nbsp;');
-	writeln('</span>');
+	if VideoId = '' then
+		VideoId := DefVideo;
 	
-	if not ishost then
+	if Favicon = '' then
+		Favicon := '../res/favicon.gif';
+
+	Params := GetQuery(GetRequest);
+
+	WriteLn('<html>');
+	WriteLn('<head>');
+	WriteLn('<meta charset="utf-8">');
+	WriteLn('<title>', PageTitle, '</title>');
+
+	WriteLn('<link rel="stylesheet" type="text/css" ',
+		'href="../general.css">');
+	WriteLn('<link rel="stylesheet" type="text/css" ',
+		'href="../room.css">');
+
+	WriteLn('<link rel="icon" href="', Favicon, '">');
+
+	WriteLn('</head>');
+	WriteLn('<body>');
+	WriteLn('<center>');
+	
+	for Query in Params do case Query[0] of
+		'host': if
+			not (Query[1] = '') and
+			(Query[1] = HostPass)
+		then
+			IsHost := True
+		else
+		begin
+			WriteLn('<h1>Error!</h1>');
+			WriteLn('Password Invalid');
+			Redirect('./', 3);
+			Halt
+		end;
+		'password': if
+			not (Query[1] = '') and
+			(Query[1] = Password)
+		then
+			AuthUser := True
+	end;
+	
+	if not (Password = '') and not (AuthUser or IsHost) then
 	begin
-		writeln('Time Buffer&nbsp;');
-		writeln('<select id="bufferselect" ',
+		WriteLn('<h1>Error!</h1>');
+		WriteLn('Private room requires a password');
+		Redirect('private.cgi', 1);
+		Halt
+	end;
+	
+	WriteLn('<p>');
+	WriteLn('<a href="../">&lt;- Home</a>');
+	WriteLn('</p>');
+
+	if not (Banner = '') then
+	begin
+		WriteLn('<p>');
+		WriteLn('<img width="1000" height="300" src="',
+			Banner, '">');
+		WriteLn('</p>')
+	end;
+	
+	if RoomDesc <> '' then
+		WriteLn('<div id="description">', RoomDesc, '</div>');
+
+	WriteLn('<table cellpadding="5" style="width:95%">');
+	WriteLn('<tr>');
+
+	WriteLn('<td width="50%" id="T1">');
+	DrawVideo;
+	WriteLn('</td>');
+
+	WriteLn('<td width="50%" id="T2">');
+	DrawPlaylist;
+	WriteLn('</td>');
+
+	WriteLn('</tr>');
+	WriteLn('<tr>');
+
+	WriteLn('<td id="T3">');
+	DrawChat;
+	WriteLn('</td>');
+
+	WriteLn('<td id="T4">');
+	DrawControls;
+	WriteLn('</td>');
+
+	WriteLn('</tr>');
+	WriteLn('</table>');
+
+	WriteLn('<h3>Settings</h3>');
+
+	WriteLn('<p>');
+
+	WriteLn('Video Size:&nbsp;');
+	WriteLn('<select id="videosize" ',
+		'onchange="changeVideoSize();">');
+	WriteLn('<option value="small">small</option>');
+	WriteLn('<option value="normal" selected="selected">normal',
+		'</option>');
+	WriteLn('<option value="large">large</option>');
+	WriteLn('</select>&nbsp;');
+
+	WriteLn('Layout:&nbsp;');
+	WriteLn('<select id="layouts" ',
+		'onchange="changeLayout();">');
+	WriteLn('<option id="default" value="default">Default</option>');
+	WriteLn('<option id="top-chat" value="top-chat">Top Chat</option>');
+	WriteLn('<option id="right-chat" value="right-chat">Right Chat',
+		'</option>');
+	WriteLn('<option id="no-chat" value="no-chat">No Chat</option>');
+	WriteLn('<option id="mirror" value="mirror">Mirrored</option>');
+	WriteLn('</select>&nbsp;');
+
+	Write('<span style="display:');
+	if IsHost then
+		Write('none')
+	else
+		Write('inline-block');
+	WriteLn(';">');
+
+	WriteLn('Synchronize:&nbsp;');
+	Write('<input type="checkbox" id="syncselect" ',
+		'onchange="changeSync();" checked>&nbsp;');
+	WriteLn('</span>');
+	
+	if not IsHost then
+	begin
+		WriteLn('Time Buffer&nbsp;');
+		WriteLn('<select id="bufferselect" ',
 			'onchange="changeBuffer();">');
-		writeln('<option value="1.0" selected="selected">1 sec',
+		WriteLn('<option value="1.0" selected="selected">1 sec',
 			'</option>');
-		writeln('<option value="2.0">2 secs</option>');
-		writeln('<option value="5.0">5 secs</option>');
-		writeln('<option value="10.0">10 secs</option>');
-		writeln('<option value="20.0">20 secs</option>');
-		writeln('</select>&nbsp;')
+		WriteLn('<option value="2.0">2 secs</option>');
+		WriteLn('<option value="5.0">5 secs</option>');
+		WriteLn('<option value="10.0">10 secs</option>');
+		WriteLn('<option value="20.0">20 secs</option>');
+		WriteLn('</select>&nbsp;')
 	end;
 
-	writeln('Sync Interval&nbsp;');
-	writeln('<select id="delayselect" onchange="changeDelay();">');
-	writeln('<option value="500">0.5 secs</option>');
-	writeln('<option value="1000" selected="selected">1.0 secs',
+	WriteLn('Sync Interval&nbsp;');
+	WriteLn('<select id="delayselect" onchange="changeDelay();">');
+	WriteLn('<option value="500">0.5 secs</option>');
+	WriteLn('<option value="1000" selected="selected">1.0 secs',
 		'</option>');
-	writeln('<option value="1500">1.5 secs</option>');
-	writeln('<option value="2000">2.0 secs</option>');
-	writeln('</select>&nbsp;');
+	WriteLn('<option value="1500">1.5 secs</option>');
+	WriteLn('<option value="2000">2.0 secs</option>');
+	WriteLn('</select>&nbsp;');
 
-	if ishost then
-		writeln('<input type="button" value="Drop Host"',
+	if IsHost then
+		WriteLn('<input type="button" value="Drop Host"',
 			'onclick="window.location='''';">&nbsp;')
 	else
-		writeln('<input type="button" value="Become Host"',
+		WriteLn('<input type="button" value="Become Host"',
 			'onclick="takeHost();">&nbsp;');
 
-	writeln('</p>');
+	WriteLn('</p>');
 
-	writeln('<p>');
-	if ishost then
+	WriteLn('<p>');
+	if IsHost then
 	begin
-		writeln('<form name="form" action="settings.cgi" ',
+		WriteLn('<form name="form" action="settings.cgi" ',
 			'method="POST" target="_blank">');
-		writeln('<input type="hidden" name="host" value="',
-			hostpass,'">');
-		writeln('</form>');
-		write('<a href="javascript:" onclick="form.submit();">');
+		WriteLn('<input type="hidden" name="host" value="',
+			HostPass,'">');
+		WriteLn('</form>');
+		Write('<a href="javascript:" onclick="form.submit();">');
 	end
 	else
-		write('<a href="settings-auth.cgi" target="_blank">');
-	writeln('[Room Settings]</a>');
-	writeln('</p>');
-	writeln('</center>');
+		Write('<a href="settings-auth.cgi" target="_blank">');
+	WriteLn('[Room Settings]</a>');
+	WriteLn('</p>');
+	WriteLn('</center>');
 
-	writeln('<hr noshade>');
-	writeln('<div id="sandbox"></div>');	
+	WriteLn('<hr noshade>');
+	WriteLn('<div id="sandbox"></div>');	
 	
-	writeln('<script>');
-	if ishost then
+	WriteLn('<script>');
+	if IsHost then
 	begin
-		randomize;
-		str(random($FFFF), sessionid);
-		str(random($FFFF), sessionkey);
-		sessionid := xorencode(sessionkey, sessionid);
+		Randomize;
+		Str(Random($FFFF), SessionId);
+		Str(Random($FFFF), SessionKey);
+		SessionId := XorEncode(SessionKey, SessionId);
 
-		assign(ref, 'session.id');
-		rewrite(ref);
-		writeln(ref, xorencode(hostpass, sessionid));
-		close(ref);
+		Assign(Ref, 'session.id');
+		ReWrite(Ref);
+		WriteLn(Ref, XorEncode(HostPass, SessionId));
+		Close(Ref);
 		
-		writeln('var SESSIONID = "', sessionid, '";');
+		WriteLn('var SESSIONID = "', SessionId, '";');
 	end;
-	writeln('var VIDEOID = "', videoid, '";');
-	writeln('</script>');
+	WriteLn('var VIDEOID = "', VideoId, '";');
+	WriteLn('</script>');
 
-	writeln('<script type="text/javascript" src="../room.js">',
+	WriteLn('<script type="text/javascript" src="../room.js">',
 		'</script>');
 
-	write('<script type="text/javascript" src="');
-	if ishost then
-		write('../sync-host.js')
+	Write('<script type="text/javascript" src="');
+	if IsHost then
+		Write('../sync-host.js')
 	else
-		write('../sync-client.js');
-	writeln('"></script>');
+		Write('../sync-client.js');
+	WriteLn('"></script>');
 
-	writeln('<script type="text/javascript" src="../init.js">',
+	WriteLn('<script type="text/javascript" src="../init.js">',
 		'</script>');
 
 	{ Custom scripts and styles }
 
-	if not (roomscript = '') then
-		writeln('<script type="text/javascript" src="',
-			roomscript, '"></script>');
+	if not (RoomScript = '') then
+		WriteLn('<script type="text/javascript" src="',
+			RoomScript, '"></script>');
 	
-	if not (roomstyle = '') then
-		writeln('<link rel="stylesheet" type="text/css" href="',
-			roomstyle, '">');
+	if not (RoomStyle = '') then
+		WriteLn('<link rel="stylesheet" type="text/css" href="',
+			RoomStyle, '">');
 
-	writeln('</body>');
-	writeln('</html>')
+	WriteLn('</body>');
+	WriteLn('</html>')
 end.

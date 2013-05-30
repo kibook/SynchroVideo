@@ -1,81 +1,87 @@
-uses strarrutils, dos, inifiles, classes, strutils;
+uses
+	strarrutils,
+	dos,
+	inifiles,
+	classes,
+	strutils;
 
 const
-	BUFFERFILE = 'syncvid.syn';
+	BufferFile = 'syncvid.syn';
 
 var
-	query     : tstringarray;
-	sessionid : string;
-	synctime  : string;
-	hostpass  : string;	
-	videoid   : string;
-	paused    : string;
-	tvmode    : string;
-	ref       : text;
-	ini       : tinifile;
-	playlist  : tstringlist;
+	Query     : TStringArray;
+	SessionId : String;
+	SyncTime  : String;
+	HostPass  : String;	
+	VideoId   : String;
+	Paused    : String;
+	TvMode    : String;
+	Ref       : Text;
+	Ini       : TIniFile;
+	Playlist  : TStringList;
 begin
-	writeln('Content-Type: text/javascript');
-	writeln;
+	WriteLn('Content-Type: text/javascript');
+	WriteLn;
 
-	query    := split(getenv('QUERY_STRING'), '&');
-	synctime := '';
+	Query    := Split(GetEnv('QUERY_STRING'), '&');
+	SyncTime := '';
 
-	ini      := tinifile.create('settings.ini');
-	hostpass := ini.readstring('room', 'host-password', '');
-	ini.free;
+	Ini      := TIniFile.Create('settings.ini');
+	HostPass := Ini.ReadString('room', 'host-password', '');
+	Ini.Free;
 
-	assign(ref, 'session.id');
-	reset(ref);
-	readln(ref, sessionid);
-	close(ref);
+	Assign(Ref, 'session.id');
+	Reset(Ref);
+	ReadLn(Ref, SessionId);
+	Close(Ref);
 
-	sessionid := xordecode(hostpass, sessionid);
+	SessionId := XorDecode(HostPass, SessionId);
 
-	assign(ref, BUFFERFILE);
-	if length(query) > 1 then
-		if query[0] = sessionid then
+	Assign(Ref, BufferFile);
+	if Length(Query) > 1 then
+		if Query[0] = SessionId then
 		begin
-			videoid  := query[1];
-			paused   := query[2];
-			synctime := query[3];
-			tvmode   := '0';
+			VideoId  := Query[1];
+			Paused   := Query[2];
+			SyncTime := Query[3];
+			TvMode   := '0';
 
-			rewrite(ref);
-			writeln(ref, videoid);
-			writeln(ref, paused);
-			writeln(ref, synctime);
-			writeln(ref, tvmode)
+			Rewrite(Ref);
+			WriteLn(Ref, VideoId);
+			WriteLn(Ref, Paused);
+			WriteLn(Ref, SyncTime);
+			WriteLn(Ref, TvMode)
+		end else
+		begin
+			WriteLn('window.location="./";');
+			WriteLn('alert("You are no longer host!");');
+			Halt
 		end
-		else begin
-			writeln('window.location="./";');
-			writeln('alert("You are no longer host!");');
-			halt(0)
-		end
-	else begin
-		reset(ref);
-		readln(ref, videoid);
-		readln(ref, paused);
-		readln(ref, synctime);
-		readln(ref, tvmode)
-	end;
-	close(ref);
-
-	writeln('SYNCPLAY="', paused,   '";');
-	writeln('SYNCTIME="', synctime, '";');
-	writeln('SYNCVURL="', videoid,  '";');
-	writeln('SYNCSVTV="', tvmode,   '";');
-
-	ini      := tinifile.create('playlist.ini');
-	playlist := tstringlist.create;
-	ini.readsection('videos', playlist);
-
-	write('Playlist.list=[');
-	for videoid in playlist do
+	else
 	begin
-		write('{title:"');
-		write(ini.readstring('videos', videoid, '???'));
-		write('",id:"',videoid, '"},')
+		Reset(ref);
+		ReadLn(Ref, Videoid);
+		ReadLn(Ref, Paused);
+		ReadLn(Ref, SyncTime);
+		ReadLn(Ref, TvMode)
 	end;
-	writeln('];')
+	Close(Ref);
+
+	WriteLn('SYNCPLAY="', Paused,   '";');
+	WriteLn('SYNCTIME="', SyncTime, '";');
+	WriteLn('SYNCVURL="', VideoId,  '";');
+	WriteLn('SYNCSVTV="', TvMode,   '";');
+
+	Ini      := TIniFile.Create('playlist.ini');
+	Playlist := TStringList.Create;
+	Ini.ReadSection('videos', Playlist);
+
+	Write('Playlist.list=[');
+	for VideoId in Playlist do
+	begin
+		Write('{title:"');
+		Write(Ini.ReadString('videos', VideoId, '???'));
+		Write('",id:"', VideoId, '"},')
+	end;
+	WriteLn('];')
 end.
