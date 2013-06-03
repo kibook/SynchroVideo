@@ -1,0 +1,28 @@
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/css"
+		href="templates/css/general.css">
+
+	<title>Room Deletion</title>
+</head>
+
+<body>
+	<center>
+	<h1>Are you sure?</h1>
+	<form action="?action=delete" method="POST"
+		enctype="multipart/form-data">
+	<input type="hidden" name="room" value="{Room}">
+	<input type="hidden" name="host" value="{Host}">
+	<input type="hidden" name="confirm" value="true">
+	<input type="submit" value="CONFIRM DELETE">
+	</form>
+	<h3 style="color:#a10;">
+	WARNING: Clicking this will permanently delete this room and any
+	saved playlists!
+	</h3>
+	Close this window now to cancel
+	</center>
+</body>
+
+</html>

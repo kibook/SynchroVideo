@@ -1,0 +1,3 @@
+object AWmAuth : TWmAuth
+	OnRequest = DoRequest
+end

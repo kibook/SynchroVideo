@@ -1,0 +1,3 @@
+object AWmInfo : TWmInfo
+	OnRequest = DoRequest
+end

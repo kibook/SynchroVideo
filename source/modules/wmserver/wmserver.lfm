@@ -1,0 +1,3 @@
+object AWmServer : TWmServer
+	OnRequest = DoRequest
+end

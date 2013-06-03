@@ -1,0 +1,24 @@
+<html>
+
+<head>
+	<title>Search Results</title>
+	<link rel="stylesheet" type="text/css"
+		href="templates/css/general.css">
+</head>
+
+<body>
+	<center>
+	<a href="./">&lt;- Home</a>
+	<h1><u>Room Search</u></h1>
+	<p>Results for &quot;{SearchTerms}&quot;</p>
+	<form action="./" method="GET">
+	<input type="hidden" name="action" value="search">
+	<input type="text" size="30" name="q">
+	<input type="submit" value="Search">
+	</form>
+	<hr width="50%" noshade>
+	{SearchResults}
+	</center>
+</body>
+
+</html>

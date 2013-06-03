@@ -1,0 +1,3 @@
+object AWmHome : TWmHome
+	OnRequest = DoRequest
+end

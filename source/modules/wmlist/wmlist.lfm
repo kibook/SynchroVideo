@@ -1,0 +1,3 @@
+object AWmList : TWmList
+	OnRequest = DoRequest
+end

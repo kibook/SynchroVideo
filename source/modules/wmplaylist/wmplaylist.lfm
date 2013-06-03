@@ -1,0 +1,3 @@
+object AWmPlaylist : TWmPlaylist
+	OnRequest = DoRequest
+end

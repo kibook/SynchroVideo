@@ -1,0 +1,3 @@
+object AWmNewRoom : TWmNewRoom
+	OnRequest = DoRequest
+end

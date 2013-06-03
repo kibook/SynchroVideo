@@ -1,0 +1,16 @@
+body {
+  margin-bottom: 30%;
+}
+p, h2, h3, ul {
+  margin-left: 20%;
+  margin-right: 20%;
+}
+h2 {
+  margin-top: 5%;
+}
+h2, b {
+  color: #a10;
+}
+h3 {
+  text-decoration: underline;
+}

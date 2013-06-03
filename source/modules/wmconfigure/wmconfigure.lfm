@@ -1,0 +1,3 @@
+object AWmConfigure : TWmConfigure
+	OnRequest = DoRequest
+end

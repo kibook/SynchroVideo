@@ -1,0 +1,3 @@
+object AWmDelete : TWmDelete
+	OnRequest = DoRequest
+end

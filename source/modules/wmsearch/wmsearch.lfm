@@ -1,0 +1,3 @@
+object AWmSearch : TWmSearch
+	OnRequest = DoRequest
+end
