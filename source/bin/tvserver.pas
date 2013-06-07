@@ -2,7 +2,6 @@ uses
 	strarrutils,
 	inifiles,
 	classes,
-	crt,
 	strutils,
 	sysutils,
 	fphttpclient;
@@ -16,20 +15,23 @@ var
 	a       : Word;
 	b       : Word;
 begin
-	GetDuration := 0;
-	with TFPHttpClient.Create(NIL) do
-	begin
-		Content := Get(YTAPIURL + Id);
-		Free
-	end;
-	a := Pos('<yt:duration seconds=''', Content) + 22;
-	Content := Copy(Content, a, Length(Content));
-	b := Pos('''/>', Content);
-	GetDuration := StrToInt(Copy(Content, 1, b - 1))
+	try
+		with TFPHttpClient.Create(NIL) do
+		begin
+			Content := Get(YTAPIURL + Id);
+			Free
+		end;
+		a := Pos('<yt:duration seconds=''', Content) + 22;
+		Content := Copy(Content, a, Length(Content));
+		b := Pos('''/>', Content);
+		GetDuration := StrToInt(Copy(Content, 1, b - 1))
+	except
+		GetDuration := 0
+	end
 end;
 
 var
-	AFile        : Text;
+	AFile      : Text;
 	Videos     : TStringList;
 	Ini        : TIniFile;
 	Room       : String;
@@ -99,10 +101,8 @@ begin
 		ReadLn(AFile, TvMode);
 		Close(AFile);
 
-		Delay(1000);
+		Sleep(1000);
 		Time := Time + 1.00;
-
-		//writeln('TIME: ', time, '||DURATION: ', duration);
 
 		if Time > Duration then
 		begin

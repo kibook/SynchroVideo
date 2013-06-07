@@ -234,7 +234,7 @@ var
 	Ch       : Char;
 	Videos   : TStringList;
 	NewIni   : TIniFile;
-	Ref      : Text;
+	AFile    : Text;
 begin
 	FName := ARequest.QueryFields.Values['list'];
 
@@ -248,8 +248,8 @@ begin
 
 	if FileExists(ListName) then
 	begin
-		AssignFile(Ref, ListName);
-		Erase(Ref)
+		AssignFile(AFile, ListName);
+		Erase(AFile)
 	end;
 
 	NewIni := TIniFile.Create(ListName);
@@ -262,8 +262,6 @@ begin
 	for Video in Videos do
 		NewIni.WriteString('videos', Video,
 			Ini.ReadString('videos', Video, ''));
-
-	NewIni.UpdateFile;
 
 	NewIni.Free;
 	Videos.Free
@@ -437,7 +435,7 @@ begin
 		'save'    : if Secure then SaveList;
 		'load'    : if Secure then LoadList;
 		'import'  : if Secure then ImportList;
-		'remove'  : if Secure then RemoveList;
+		'remove'  : if Secure then RemoveList
 	end;
 
 	Ini.Free;

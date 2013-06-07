@@ -42,6 +42,26 @@ room can be set in the <b>"[Room Settings]"</b> page of each room by anyone
 with the room's host password. Searches will also look at and show the
 current video playing in the room, so you can find rooms by their
 playlists.</p>
+<p>If you already know the name of the room you want to join, you can go
+to its URL directly. The format for room URLs is<br>
+<br>
+<span class="url"><!--
+-->http://synchrovideo.com?action=join&amp;room=ROOM_NAME
+</span><br>
+<br>
+You can also use
+<br><br>
+<span class="url">
+http://synchrovideo.com/room/ROOM_NAME
+</span><br>
+<br>
+or
+<br><br>
+<span class="url">
+http://synchrovideo.com/r/ROOM_NAME
+</span><br>
+<br>
+to go to the room's page</p>
 
 <a id="format"></a>
 <h2>What video formats are supported?</h2>
@@ -50,7 +70,8 @@ support for other video-sharing sites is planned.</p>
 
 <a id="source"></a>
 <h2>Is this project open-source?</h2>
-<p>Yes, you can view the latest source code <a href="../source">here</a>.
+<p>Yes, you can view the latest source code <a
+	href="https://github.com/kibook/SynchroVideo">here</a>.
 
 <a id="create"></a>
 <h2>How do I create a room?</h2>
@@ -60,7 +81,7 @@ spam) into the box below the generated CAPTCHA picture. If the CAPTCHA is
 too difficult to read, try generating a new one by hitting the "Reset"
 button or refreshing the page.</p>
 <p>In the "Room Name" box, enter the full title that you want for your room.
-This name should be 5-12 alphanumeric characters long and may also contain
+This name should be 5-16 alphanumeric characters long and may also contain
 spaces.</p>
 <p>In the "Host Pass" box, enter the password you will use to gain "host" in
 your room. This should also only contain alphanumeric characters.</p>
@@ -113,7 +134,9 @@ it via the "Add" box below the playlist. If it is locked however, only the
 host can add new videos.</p>
 <p>You can adjust the size of the video in the <b>Settings</b> section near
 the bottom of the page. This can help accomodate smaller/larger computer
-screens.</p>
+screens. You can also change the position of the video, chat, playlist, and
+controls by choosing a different layout from the <b>Layout</b> drop-down
+list.</p>
 
 <h3>Host</h3>
 <p>To become the room's host, simply click the "Become Host" button in the
@@ -141,8 +164,8 @@ playlist by the same name.</p>
 List box or enter its name manually, then click the Load button.</p>
 <p>To <b>delete</b> a playlist, select one from the drop-down menu below the
 List box or enter its name manually, then click the Delete button.</p>
-<p>To import a YouTube playlist, paste the playlist URL into the List box,
-then click the Import button.</p>
+<p>To <b>import</b> a YouTube playlist, paste the playlist URL into the
+List box,then click the Import button.</p>
 <p>Keep in mind that loading/importing videos from a playlist will append
 the videos to the current playlist. Use the Clear button to start fresh
 before loading/importing if you wish.</p>

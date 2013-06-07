@@ -84,7 +84,8 @@ begin
 	begin
 		FSearchResults := FSearchResults +
 			'<h3>'+
-			'<a href="room/'+Each+'">'+RoomName+'</a>'+
+			'<a href="?action=join&room='+Each+'">'+
+				RoomName+'</a>'+
 			'</h3>'#13#10+
 			'<p>'+RoomDesc+'</p>'#13#10+
 			'<p class="smalltext">'#13#10+

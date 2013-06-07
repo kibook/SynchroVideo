@@ -46,7 +46,7 @@ begin
 					RawText[i + 2]);
 				ConvertHex := Concat(ConvertHex,
 					Chr(Hex2Dec(Code)));
-				inc(i, 2)
+				Inc(i, 2)
 			end
 			else
 				ConvertHex := Concat(ConvertHex, Ch);

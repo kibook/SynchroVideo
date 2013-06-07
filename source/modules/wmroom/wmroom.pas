@@ -56,6 +56,7 @@ var
 	Host     : String;
 	Password : String;
 	IsAuth   : Boolean;
+	BadPass  : Boolean;
 
 function NameFormat(const RoomName : String) : String;
 begin
@@ -94,10 +95,21 @@ begin
 		IsAuth  := (not (Pass = '') and (Pass = Password)) or 
 			(Password = '') or FIsHost;
 
+		BadPass := (not (Host = '') and not FIsHost) or
+			(not (Pass = '') and not IsAuth);
+
 		FChannelName := NameFormat(FPageTitle);
 
-		ModuleTemplate.FileName := 'templates/pages/' +
-			IfThen(IsAuth, 'room.htm', 'error/room.htm');
+		if BadPass then
+			ModuleTemplate.FileName :=
+				'templates/pages/error/auth.htm'
+		else if IsAuth then
+			ModuleTemplate.FileName :=
+				'templates/pages/room.htm'
+		else
+			ModuleTemplate.FileName :=
+				'templates/pages/error/room.htm';
+
 		ModuleTemplate.AllowTagParams := True;
 		ModuleTemplate.OnReplaceTag := @ReplaceTags;
 

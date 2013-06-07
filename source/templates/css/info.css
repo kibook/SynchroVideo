@@ -1,7 +1,7 @@
 body {
   margin-bottom: 30%;
 }
-p, h2, h3, ul {
+p, h2, h3, ul, pre {
   margin-left: 20%;
   margin-right: 20%;
 }
@@ -13,4 +13,9 @@ h2, b {
 }
 h3 {
   text-decoration: underline;
+}
+span.url {
+  background-color: #aaa;
+  color: #222;
+  padding: 5px;
 }

@@ -1,0 +1,3 @@
+<filesmatch .*>
+deny from all
+</filesmatch>

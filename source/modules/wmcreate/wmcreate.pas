@@ -85,18 +85,19 @@ begin
 
 	NewIni := TIniFile.Create(Path + 'settings.ini');
 	NewIni.CacheUpdates := True;
-	NewIni.WriteString('room', 'name', Room);
-	NewIni.WriteString('room', 'url', FRoomDir);
-	NewIni.WriteString('room', 'video', DefVideo);
-	NewIni.WriteString('room', 'banner', '');
-	NewIni.WriteString('room', 'irc-settings', '');
-	NewIni.WriteString('room', 'password', '');
+
+	NewIni.WriteString('room', 'name',          Room);
+	NewIni.WriteString('room', 'url',           FRoomDir);
+	NewIni.WriteString('room', 'video',         DefVideo);
+	NewIni.WriteString('room', 'banner',        '');
+	NewIni.WriteString('room', 'irc-settings',  '');
+	NewIni.WriteString('room', 'password',      '');
 	NewIni.WriteString('room', 'host-password', Pass);
-	NewIni.WriteString('room', 'tags', '');
-	NewIni.WriteString('room', 'description', '');
-	NewIni.WriteString('room', 'favicon', '');
-	NewIni.WriteString('room', 'script', '');
-	NewIni.WriteString('room', 'style', '');
+	NewIni.WriteString('room', 'tags',          '');
+	NewIni.WriteString('room', 'description',   '');
+	NewIni.WriteString('room', 'favicon',       '');
+	NewIni.WriteString('room', 'script',        '');
+	NewIni.WriteString('room', 'style',         '');
 	NewIni.Free;
 
 	FileCreate(Path + 'syncvid.syn');

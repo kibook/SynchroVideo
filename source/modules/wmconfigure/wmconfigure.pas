@@ -3,6 +3,7 @@ unit WmConfigure;
 interface
 uses
 	IniFiles,
+	SysUtils,
 	HTTPDefs,
 	fpHTTP,
 	fpWeb;
@@ -43,6 +44,45 @@ var
 	RoomStyle   : String;
 	HostPass    : String;
 	Ini         : TIniFile;
+
+procedure ThrowError(Err : String);
+begin
+	AResponse.Contents.LoadFromFile(
+		'templates/pages/error/configure/'+Err+'.htm')
+end;
+
+procedure ConfigureRoom;
+begin
+	Ini.WriteString('room', 'name',          PageTitle);
+	Ini.WriteString('room', 'banner',        Banner);
+	Ini.WriteString('room', 'favicon',       Favicon);
+	Ini.WriteString('room', 'irc-settings',  IrcConf);
+	Ini.WriteString('room', 'password',      NewPass);
+	Ini.WriteString('room', 'host-password', NewHost);
+	Ini.WriteString('room', 'tags',          Tags);
+	Ini.WriteString('room', 'description',   Description);
+	Ini.WriteString('room', 'script',        RoomScript);
+	Ini.WriteString('room', 'style',         RoomStyle);
+
+	AResponse.Contents.LoadFromFile('templates/pages/configure.htm')
+end;
+
+procedure CheckInput;
+var
+	NameCheck : Boolean;
+	c         : Char;
+begin
+	NameCheck := True;
+	for c in PageTitle do
+		if not (c in ['A'..'Z','a'..'z','0'..'9',' ']) then
+			NameCheck := False;
+
+	if not NameCheck then
+		ThrowError('badname')
+	else
+		ConfigureRoom
+end;
+
 begin
 	Room        := ARequest.ContentFields.Values['room'];
 	Pass        := ARequest.ContentFields.Values['host'];
@@ -63,26 +103,11 @@ begin
 	HostPass := Ini.ReadString('room', 'host-password', '');
 
 	if not (Pass = '') and (Pass = HostPass) then
-	begin
-		Ini.WriteString('room', 'name',          PageTitle);
-		Ini.WriteString('room', 'banner',        Banner);
-		Ini.WriteString('room', 'favicon',       Favicon);
-		Ini.WriteString('room', 'irc-settings',  IrcConf);
-		Ini.WriteString('room', 'password',      NewPass);
-		Ini.WriteString('room', 'host-password', NewHost);
-		Ini.WriteString('room', 'tags',          Tags);
-		Ini.WriteString('room', 'description',   Description);
-		Ini.WriteString('room', 'script',        RoomScript);
-		Ini.WriteString('room', 'style',         RoomStyle);
-
-		Ini.Free;
-
-		AResponse.Contents.LoadFromFile(
-			'templates/pages/configure.htm')
-	end
+		CheckInput
 	else
-		AResponse.Contents.LoadFromFile(
-			'templates/pages/error/configure.htm');
+		ThrowError('configure');
+
+	Ini.Free;
 
 	Handle := True
 end;
