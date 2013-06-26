@@ -10,6 +10,7 @@ var LAYOUT = 'layout1';
 
 var Player;
 var Playlist = {index: 0, locked: false, list: [{title:"", id:VIDEOID}]};
+var CPlaylist = {};
 var Playlists = [];
 
 var $ = function(id) {
@@ -202,4 +203,11 @@ var changeLayout = function() {
 	switchLayout(layout);
 	setCookie('syncvid_layout', layout, 365);
 	window.location = '';
+}
+var popout = function() {
+	window.open("?action=mini&room=" + ROOMNAME, "",
+		"width=680, height=480");
+	$('syncselect').checked = false;		
+	clearInterval(SYNC);
+	Player.pauseVideo();
 }

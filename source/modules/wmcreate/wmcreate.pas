@@ -17,13 +17,15 @@ type
 			Sender          : TObject;
 			const TagString : String;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : String
+		);
 	published
 		procedure DoRequest(
 			Sender     : TObject;
 			ARequest   : TRequest;
 			AResponse  : TResponse;
-			var Handle : Boolean);
+			var Handle : Boolean
+		);
 	end;
 
 var
@@ -36,7 +38,8 @@ procedure TWmCreate.ReplaceTags(
 	Sender          : TObject;
 	const TagString : String;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : String
+);
 begin
 	case TagString of
 		'Room' : ReplaceText := FRoomDir
@@ -47,7 +50,8 @@ procedure TWmCreate.DoRequest(
 	Sender     : TObject;
 	ARequest   : TRequest;
 	AResponse  : TResponse;
-	var Handle : Boolean);
+	var Handle : Boolean
+);
 const
 	CaptchaDir = 'res/captcha/';
 

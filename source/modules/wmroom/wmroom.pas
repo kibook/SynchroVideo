@@ -16,6 +16,7 @@ type
 		FRoom        : String;
 		FPageTitle   : String;
 		FBanner      : String;
+		FFavicon     : String;
 		FDescription : String;
 		FVideoId     : String;
 		FIrcConf     : String;
@@ -43,87 +44,12 @@ var
 implementation
 {$R *.lfm}
 
-procedure TWmRoom.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
-const
-	DefVideo = '8tPnX7OPo0Q';
-var
-	Ini      : TIniFile;
-	Pass     : String;
-	Host     : String;
-	Password : String;
-	IsAuth   : Boolean;
-	BadPass  : Boolean;
-
-function NameFormat(const RoomName : String) : String;
-begin
-	Result := LowerCase(RoomName);
-	Result := StringReplace(Result, ' ', '-', [rfReplaceAll])
-end;
-
-begin
-	FRoom := ARequest.QueryFields.Values['room'];
-	Host  := ARequest.ContentFields.Values['host'];
-	Pass  := ARequest.ContentFields.Values['password'];
-
-	if not FileExists('rooms/' + FRoom + '/settings.ini') then
-	begin
-		AResponse.Code := 404;
-		AResponse.CodeText := 'Room does not exist';
-		AResponse.Contents.LoadFromFile(
-			'templates/pages/404/room.htm')
-	end else
-	begin
-		Ini := TIniFile.Create('rooms/' + FRoom + '/settings.ini');
-
-		FPageTitle   := Ini.ReadString('room','name',         '');
-		FBanner      := Ini.ReadString('room','banner',       '');
-		FDescription := Ini.ReadString('room','description',  '');
-		FVideoId     := Ini.ReadString('room','video',  DefVideo);
-		FIrcConf     := Ini.ReadString('room','irc-settings', '');
-		Password     := Ini.ReadString('room','password',     '');
-		FHostPass    := Ini.ReadString('room','host-password','');
-		FRoomScript  := Ini.ReadString('room','script',       '');
-		FRoomStyle   := Ini.ReadString('room','style',        '');
-
-		Ini.Free;
-
-		FIsHost :=  not (Host = '') and (Host = FHostPass);
-		IsAuth  := (not (Pass = '') and (Pass = Password)) or 
-			(Password = '') or FIsHost;
-
-		BadPass := (not (Host = '') and not FIsHost) or
-			(not (Pass = '') and not IsAuth);
-
-		FChannelName := NameFormat(FPageTitle);
-
-		if BadPass then
-			ModuleTemplate.FileName :=
-				'templates/pages/error/auth.htm'
-		else if IsAuth then
-			ModuleTemplate.FileName :=
-				'templates/pages/room.htm'
-		else
-			ModuleTemplate.FileName :=
-				'templates/pages/error/room.htm';
-
-		ModuleTemplate.AllowTagParams := True;
-		ModuleTemplate.OnReplaceTag := @ReplaceTags;
-
-		AResponse.Content := ModuleTemplate.GetContent
-	end;
-
-	Handle := True
-end;
-
 procedure TWmRoom.ReplaceTags(
 	Sender          : TObject;
 	const TagString : String;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : String
+);
 
 function GetHostControls : String;
 begin
@@ -240,6 +166,7 @@ begin
 	case TagString of
 		'PageTitle'    : ReplaceText := FPageTitle;
 		'Banner'       : ReplaceText := GetBanner;
+		'Favicon'      : ReplaceText := FFavicon;
 		'Description'  : ReplaceText := GetDescription;
 		'VideoId'      : ReplaceText := FVideoId;
 		'ChannelName'  : ReplaceText := FChannelName;
@@ -255,6 +182,84 @@ begin
 		'RoomStyle'    : ReplaceText := FRoomStyle;
 		'Room'         : ReplaceText := FRoom
 	end
+end;
+
+procedure TWmRoom.DoRequest(
+	Sender     : TObject;
+	ARequest   : TRequest;
+	AResponse  : TResponse;
+	var Handle : Boolean
+);
+const
+	DefVideo = '8tPnX7OPo0Q';
+var
+	Ini      : TIniFile;
+	Pass     : String;
+	Host     : String;
+	Password : String;
+	IsAuth   : Boolean;
+	BadPass  : Boolean;
+
+function NameFormat(const RoomName : String) : String;
+begin
+	Result := LowerCase(RoomName);
+	Result := StringReplace(Result, ' ', '-', [rfReplaceAll])
+end;
+
+begin
+	FRoom := ARequest.QueryFields.Values['room'];
+	Host  := ARequest.ContentFields.Values['host'];
+	Pass  := ARequest.ContentFields.Values['password'];
+
+	if not FileExists('rooms/' + FRoom + '/settings.ini') then
+	begin
+		AResponse.Code := 404;
+		AResponse.CodeText := 'Room does not exist';
+		AResponse.Contents.LoadFromFile(
+			'templates/pages/404/room.htm')
+	end else
+	begin
+		Ini := TIniFile.Create('rooms/' + FRoom + '/settings.ini');
+
+		FPageTitle   := Ini.ReadString('room','name',         '');
+		FBanner      := Ini.ReadString('room','banner',       '');
+		FFavicon     := Ini.ReadString('room','favicon',      '');
+		FDescription := Ini.ReadString('room','description',  '');
+		FVideoId     := Ini.ReadString('room','video',  DefVideo);
+		FIrcConf     := Ini.ReadString('room','irc-settings', '');
+		Password     := Ini.ReadString('room','password',     '');
+		FHostPass    := Ini.ReadString('room','host-password','');
+		FRoomScript  := Ini.ReadString('room','script',       '');
+		FRoomStyle   := Ini.ReadString('room','style',        '');
+
+		Ini.Free;
+
+		FIsHost :=  not (Host = '') and (Host = FHostPass);
+		IsAuth  := (not (Pass = '') and (Pass = Password)) or 
+			(Password = '') or FIsHost;
+
+		BadPass := (not (Host = '') and not FIsHost) or
+			(not (Pass = '') and not IsAuth);
+
+		FChannelName := NameFormat(FPageTitle);
+
+		if BadPass then
+			ModuleTemplate.FileName :=
+				'templates/pages/error/auth.htm'
+		else if IsAuth then
+			ModuleTemplate.FileName :=
+				'templates/pages/room.htm'
+		else
+			ModuleTemplate.FileName :=
+				'templates/pages/error/room.htm';
+
+		ModuleTemplate.AllowTagParams := True;
+		ModuleTemplate.OnReplaceTag := @ReplaceTags;
+
+		AResponse.Content := ModuleTemplate.GetContent
+	end;
+
+	Handle := True
 end;
 
 initialization

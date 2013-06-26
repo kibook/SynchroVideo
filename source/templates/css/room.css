@@ -23,7 +23,7 @@ td.btn {
 #lock, #tvmode {
 	font-size: 12px;
 }
-#addwait, #importwait {
+#addwait, #importwait, #sanitizewait {
 	display: none;
 	color: #a10;
 }

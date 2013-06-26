@@ -1,10 +1,9 @@
 uses
-	strarrutils,
-	inifiles,
-	classes,
-	strutils,
-	sysutils,
-	fphttpclient;
+	IniFiles,
+	Classes,
+	StrUtils,
+	SysUtils,
+	FPHttpClient;
 const
 	BufferFile = 'syncvid.syn';
 	YTAPIURL   = 'http://gdata.youtube.com/feeds/api/videos/';	

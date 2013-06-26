@@ -22,7 +22,7 @@ uses
 	WmTVMode;
 
 var
-	Ini      : TIniFile;
+	Ini : TIniFile;
 begin
 	Application.Initialize;
 

@@ -26,15 +26,32 @@ var syncInit = function() {
 	SYNC = setInterval(sync, SYNCDELAY);
 }
 var updatePlaylist = function() {
-	if (Playlist.locked)
-		$('lock').innerHTML = '(locked)';
-	else
-		$('lock').innerHTML = '(unlocked)';
-
 	if (SYNCSVTV == '1')
 		$('tvmode').innerHTML = '(tvmode on)';
 	else
 		$('tvmode').innerHTML = '(tvmode off)';
+
+	var same = true;
+	try {	
+		same = (CPlaylist.index==Playlist.index)&&
+			(CPlaylist.locked==Playlist.locked)&&
+			(CPlaylist.list.length==Playlist.list.length);
+		if (same)
+			for (var i = 0; i < Playlist.list.length; i++)
+				same=same&&(CPlaylist.list[i].id==
+					Playlist.list[i].id);
+	}
+	catch (err) {
+		same = false;
+	}
+
+	if (same)
+		return;
+
+	if (Playlist.locked)
+		$('lock').innerHTML = '(locked)';
+	else
+		$('lock').innerHTML = '(unlocked)';
 
 	$('playlistcount').innerHTML =
 		'('+Playlist.list.length+' videos)';
@@ -70,6 +87,10 @@ var updatePlaylist = function() {
 			'</td></tr>';
 		}
 	$('playlistvideos').innerHTML = table + '</table>';
+
+	CPlaylist.index = Playlist.index;
+	CPlaylist.locked = Playlist.locked;
+	CPlaylist.list = Playlist.list;
 }
 var addVideo = function(id) {
 	sendCall('playlist', {do: 'status'}, function() {

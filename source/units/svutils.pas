@@ -17,11 +17,11 @@ uses
 	StrUtils;
 
 const
-	HtmlCodes: Array [0..1] of String = (
+	HtmlCodes  : array [0..1] of String = (
 		'+',   #32
 	);
 
-	CleanCodes: Array [0..7] of String = (
+	CleanCodes : array [0..7] of String = (
 		'"',  '&quot;',
 		'''', '&#39;',
 		'>',  '&gt;',
@@ -56,7 +56,7 @@ begin
 end;
 
 function ReplaceText(RawText : String;
-	const List : Array of String) : String;
+	const List : array of String) : String;
 var
 	i : Integer;
 begin

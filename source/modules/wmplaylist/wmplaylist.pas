@@ -50,6 +50,8 @@ procedure TWmPlaylist.DoRequest(
 	ARequest   : TRequest;
 	AResponse  : TResponse;
 	var Handle : Boolean);
+const
+	YTAPIURL = 'http://gdata.youtube.com/feeds/api/videos/';
 var
 	Room      : String;
 	SessionId : String;
@@ -95,8 +97,6 @@ begin
 end;
 
 function GetTitle(Id : String) : String;
-const
-	YTAPIURL = 'http://gdata.youtube.com/feeds/api/videos/';
 var
 	Content : String;
 	a       : Word;
@@ -365,7 +365,7 @@ begin
 			Ini.WriteString('videos', VideoId, Title)
 	until Pos('<media:title type=''plain''>', Content) = 0
 end;
-	
+
 begin
 	Id := ARequest.QueryFields.Values['id'];
 
@@ -375,6 +375,46 @@ begin
 	begin
 		ParseList;
 	end
+end;
+
+function GetDuration(Id : String) : Double;
+var
+	Content : String;
+	a       : Word;
+	b       : Word;
+begin
+	try
+		with TFPHttpClient.Create(NIL) do
+		begin
+			Content := Get(YTAPIURL + Id);
+			Free
+		end;
+		a := Pos('<yt:duration seconds=''', Content) + 22;
+		Content := Copy(Content, a, Length(Content));
+		b := Pos('''/>', Content);
+		GetDuration := StrToInt(Copy(Content, 1, b - 1))
+	except
+		GetDuration := 0
+	end
+end;
+
+procedure SanitizeList;
+var
+	Videos : TStringList;
+	Video  : String;
+	Count  : Integer = 0;
+begin
+	Videos := TStringList.Create;
+	Ini.ReadSection('videos', Videos);
+
+	for Video in Videos do
+		if GetDuration(Video) = 0 then
+		begin
+			Ini.DeleteKey('videos', Video);
+			Inc(Count)
+		end;
+
+	Videos.Free
 end;
 
 procedure RemoveList;
@@ -423,19 +463,20 @@ begin
 	Locked := Ini.ReadString('status', 'locked', 'true') = 'true';
 	
 	case ARequest.QueryFields.Values['do'] of
-		'status'  : WriteStatus;
-		'list'    : WritePlaylists;
-		'add'     : AddVideo;
-		'delete'  : if Secure then DeleteVideo;
-		'lock'    : if Secure then ToggleLock(True);
-		'unlock'  : if Secure then ToggleLock(False);
-		'clear'   : if Secure then ClearList;
-		'shuffle' : if Secure then ShuffleList;
-		'sort'    : if Secure then SortList;
-		'save'    : if Secure then SaveList;
-		'load'    : if Secure then LoadList;
-		'import'  : if Secure then ImportList;
-		'remove'  : if Secure then RemoveList
+		'status'   : WriteStatus;
+		'list'     : WritePlaylists;
+		'add'      : AddVideo;
+		'delete'   : if Secure then DeleteVideo;
+		'lock'     : if Secure then ToggleLock(True);
+		'unlock'   : if Secure then ToggleLock(False);
+		'clear'    : if Secure then ClearList;
+		'shuffle'  : if Secure then ShuffleList;
+		'sort'     : if Secure then SortList;
+		'save'     : if Secure then SaveList;
+		'load'     : if Secure then LoadList;
+		'import'   : if Secure then ImportList;
+		'remove'   : if Secure then RemoveList;
+		'sanitize' : if Secure then SanitizeList
 	end;
 
 	Ini.Free;
