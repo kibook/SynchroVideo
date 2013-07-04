@@ -1,75 +1,84 @@
 unit WmList;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
 	Classes,
-	IniFiles,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmList = Class(TFPWebModule)
+	TListModule = class(TFpWebModule)
 	private
-		FRoomList : String;
+		FRoomList : string;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmList : TWmList;
+	ListModule : TListModule;
 
 implementation
+
 {$R *.lfm}
 
-procedure TWmList.ReplaceTags(
+uses
+	SysUtils,
+	IniFiles;
+
+procedure TListModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : string);
 begin
 	case TagString of
 		'RoomList' : ReplaceText := FRoomList
 	end
 end;
 
-procedure TWmList.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
-const
-	CRLF = #13#10;
-
+procedure TListModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 var
-	Ini   : TIniFile;
-	Rooms : TStringList;
-	Desc  : String;
-	Title : String;
-	Room  : String;
-	Priv  : Boolean;
-	i     : Word = 0;
+	Ini     : TIniFile;
+	Rooms   : TStringList;
+	Content : TStringList;
+	Desc    : string;
+	Title   : string;
+	Room    : string;
+	Priv    : Boolean;
+	i       : Word = 0;
 
 procedure ListRoom;
 begin
+	if i mod 3 = 0 then
+		FRoomList := FRoomList+'<tr>'+LineEnding;
+
 	Title := Ini.ReadString('room', 'name', '');
 	Desc  := Ini.ReadString('room', 'description', '');
 
-	FRoomList := FRoomList + '<td>' + CRLF;
-	FRoomList := FRoomList + '<div title="'+Desc+'">' + CRLF;
-	FRoomList := FRoomList + '<h3>';
-	FRoomList := FRoomList + '<a href="room/'+Room+'">'+Title+'</a>';
-	FRoomList := FRoomList + '</h3>' + CRLF;
-	FRoomList := FRoomList + '</div' + CRLF + '</td>' + CRLF
+	FRoomList := FRoomList +
+		Format(Content.Text, [Desc, Room, Title]);
+
+	if (i mod 3 = 2) or (i = Rooms.Count - 1) then
+		FRoomList := FRoomList+'</tr>'+LineEnding;
+	Inc(i)
 end;
 	
 begin
@@ -82,24 +91,21 @@ begin
 
 	FRoomList := '';
 
+	Content := TStringList.Create;
+	Content.LoadFromFile('templates/html/listentry.htm');
+
 	for Room in Rooms do
 	begin
-		Ini := TIniFile.Create('rooms/'+Room+'/settings.ini');
-		Priv := not (Ini.ReadString('room','password','')='');
+		Ini := TIniFile.Create('rooms/' + Room + '/settings.ini');
+		Priv := not (Ini.ReadString('room','password','') = '');
 
 		if not Priv then
-		begin
-			if i mod 3 = 0 then
-				FRoomList := FRoomList + '<tr>' + CRLF;
-
 			ListRoom;
 
-			if i mod 3 = 2 then
-				FRoomList := FRoomList + '</tr>' + CRLF;
-			Ini.Free;
-			Inc(i)
-		end
+		Ini.Free;		
 	end;
+
+	Content.Free;
 
 	ModuleTemplate.FileName := 'templates/pages/list.htm';
 	ModuleTemplate.AllowTagParams := True;
@@ -107,9 +113,9 @@ begin
 
 	AResponse.Content := ModuleTemplate.GetContent;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('list', TWmList)
+	RegisterHttpModule('list', TListModule)
 end.

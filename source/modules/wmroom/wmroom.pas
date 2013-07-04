@@ -1,57 +1,64 @@
 unit WmRoom;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
 	Classes,
-	SysUtils,
-	StrUtils,
-	IniFiles,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmRoom = Class(TFPWebModule)
+	TRoomModule = class(TFpWebModule)
 	private
-		FRoom        : String;
-		FPageTitle   : String;
-		FBanner      : String;
-		FFavicon     : String;
-		FDescription : String;
-		FVideoId     : String;
-		FIrcConf     : String;
-		FChannelName : String;
-		FHostPass    : String;
-		FRoomScript  : String;
-		FRoomStyle   : String;
+		FRoom        : string;
+		FPageTitle   : string;
+		FBanner      : string;
+		FFavicon     : string;
+		FDescription : string;
+		FVideoId     : string;
+		FIrcConf     : string;
+		FChannelName : string;
+		FHostPass    : string;
+		FRoomScript  : string;
+		FRoomStyle   : string;
 		FIsHost      : Boolean;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmRoom : TWmRoom;
+	RoomModule : TRoomModule;
 
 implementation
+
 {$R *.lfm}
 
-procedure TWmRoom.ReplaceTags(
+uses
+	SysUtils,
+	StrUtils,
+	IniFiles;
+
+procedure TRoomModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String
+	out ReplaceText : string
 );
 
-function GetHostControls : String;
+function GetHostControls : string;
 begin
 	if FIsHost then
 		with TStringList.Create do
@@ -62,7 +69,7 @@ begin
 		end
 end;
 
-function GetListControls : String;
+function GetListControls : string;
 begin
 	if FIsHost then
 		with TStringList.Create do
@@ -73,7 +80,7 @@ begin
 		end
 end;
 
-function GetSyncControls : String;
+function GetSyncControls : string;
 begin
 	if not FIsHost then
 		with TStringList.Create do
@@ -84,39 +91,40 @@ begin
 		end
 end;
 
-function GetHostButton : String;
+function GetHostButton : string;
 begin
-	if FIsHost then
-		Result := '<input type="button" ' +
-			'value="Drop Host" ' +
-			'onclick="dropHost();">&nbsp;'
-	else
-		Result := '<input type="button" ' +
-			'value="Become Host" ' +
-			'onclick="takeHost();">&nbsp;'
+	with TStringList.Create do
+	begin
+		if FIsHost then
+			LoadFromFile('templates/html/hostbutton.htm')
+		else
+			LoadFromFile('templates/html/clientbutton.htm');
+		Result := Text;
+		Free
+	end
 end;
 
-function GetSettingsLink : String;
+function GetSettingsLink : string;
 begin
-	if FIsHost then
-		Result := '<form name="form" ' +
-			'action="?action=settings&room='+FRoom+'" '+
-			'method="POST" target="_blank">'#13#10 +
-			'<input type="hidden" name="host" ' +
-			'value="'+FHostPass+'">'#13#10 +
-			'</form>'#13#10 +
-			'<a href="javascript:" onclick="form.submit();">'
-	else
-		Result := '<a href="?action=settings&room='+FRoom+'" '+
-			'target="_blank">';
-	
-	Result := Result + '[Room Settings]</a>'
+	with TStringList.Create do
+	begin
+		if FIsHost then
+		begin
+			LoadFromFile('templates/html/hostsettings.htm');
+			Result := Format(Text, [FRoom, FHostPass])
+		end else
+		begin
+			LoadFromFile('templates/html/clientsettings.htm');
+			Result := Format(Text, [FRoom])
+		end;
+		Free
+	end
 end;
 
-function GetRoomVars : String;
+function GetRoomVars : string;
 var
-	SessionId  : String;
-	SessionKey : String;
+	SessionId  : string = 'undefined';
+	SessionKey : string;
 	AFile      : Text;
 begin
 	Result := '';
@@ -131,33 +139,46 @@ begin
 		Rewrite(AFile);
 		WriteLn(AFile, XorEncode(FHostPass, SessionId));
 		CloseFile(AFile);
-
-		Result := 'var SESSIONID = "' + SessionId + '";'#13#10;
 	end;
 
-	Result := Result + 'var VIDEOID = "' + FVideoId + '";'#13#10;
-	Result := Result + 'var ROOMNAME = "' + FRoom + '";'
+	with TStringList.Create do
+	begin
+		LoadFromFile('templates/js/roomvars.js');
+		Result := Format(Text, [SessionId, FVideoId, FRoom]);
+		Free
+	end
 end;
 
-function GetSyncScript : String;
+function GetSyncScript : string;
 begin
-	Result := 'templates/js/' +
-		IfThen(FIsHost, 'sync-host.js', 'sync-client.js')
+	if FIsHost then
+		Result := 'templates/js/sync-host.js'
+	else
+		Result := 'templates/js/sync-client.js'
 end;
 
-function GetBanner : String;
+function GetBanner : string;
 begin
 	if not (FBanner = '') then
-		Result := '<p><img width="1000" height="300" src="' +
-			FBanner + '"></p>'
+		with TStringList.Create do
+		begin
+			LoadFromFile('templates/html/banner.htm');
+			Result := Format(Text, [FBanner]);
+			Free
+		end
 	else
 		Result := ''
 end;
 
-function GetDescription : String;
+function GetDescription : string;
 begin
 	if not (FDescription = '') then
-		Result := '<div id="description">'+FDescription+'</div>'
+		with TStringList.Create do
+		begin
+			LoadFromFile('templates/html/description.htm');
+			Result := Format(Text, [FDescription]);
+			Free
+		end
 	else
 		Result := ''
 end;
@@ -184,23 +205,23 @@ begin
 	end
 end;
 
-procedure TWmRoom.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean
+procedure TRoomModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean
 );
 const
 	DefVideo = '8tPnX7OPo0Q';
 var
 	Ini      : TIniFile;
-	Pass     : String;
-	Host     : String;
-	Password : String;
+	Pass     : string;
+	Host     : string;
+	Password : string;
 	IsAuth   : Boolean;
 	BadPass  : Boolean;
 
-function NameFormat(const RoomName : String) : String;
+function NameFormat(const RoomName : string) : string;
 begin
 	Result := LowerCase(RoomName);
 	Result := StringReplace(Result, ' ', '-', [rfReplaceAll])
@@ -221,16 +242,16 @@ begin
 	begin
 		Ini := TIniFile.Create('rooms/' + FRoom + '/settings.ini');
 
-		FPageTitle   := Ini.ReadString('room','name',         '');
-		FBanner      := Ini.ReadString('room','banner',       '');
-		FFavicon     := Ini.ReadString('room','favicon',      '');
-		FDescription := Ini.ReadString('room','description',  '');
+		FPageTitle   := Ini.ReadString('room','name', '');
+		FBanner      := Ini.ReadString('room','banner', '');
+		FFavicon     := Ini.ReadString('room','favicon', '');
+		FDescription := Ini.ReadString('room','description', '');
 		FVideoId     := Ini.ReadString('room','video',  DefVideo);
 		FIrcConf     := Ini.ReadString('room','irc-settings', '');
-		Password     := Ini.ReadString('room','password',     '');
-		FHostPass    := Ini.ReadString('room','host-password','');
-		FRoomScript  := Ini.ReadString('room','script',       '');
-		FRoomStyle   := Ini.ReadString('room','style',        '');
+		Password     := Ini.ReadString('room','password', '');
+		FHostPass    := Ini.ReadString('room','host-password', '');
+		FRoomScript  := Ini.ReadString('room','script', '');
+		FRoomStyle   := Ini.ReadString('room','style', '');
 
 		Ini.Free;
 
@@ -259,9 +280,9 @@ begin
 		AResponse.Content := ModuleTemplate.GetContent
 	end;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('join', TWmRoom)
+	RegisterHttpModule('join', TRoomModule)
 end.

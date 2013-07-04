@@ -1,3 +1,3 @@
-object AWmSettings : TWmSettings
-	OnRequest = DoRequest
+object SettingsModule : TSettingsModule
+	OnRequest = Request
 end

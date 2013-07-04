@@ -1,60 +1,67 @@
 unit WmNewRoom;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
 	Classes,
-	FPWritePng,
-	FPImage,
-	FPCanvas,
-	FPImgCanv,
-	FTFont,
-	Base64,
-	IniFiles,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	FpImage,
+	FpCanvas,
+	FpImgCanv,
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TCanvas = Class(TFPImageCanvas)
+	TCanvas = class(TFpImageCanvas)
 	protected
 		procedure DoCopyRect(
 			x                : Integer;
 			y                : Integer;
-			Canvas           : TFPCustomCanvas;
+			Canvas           : TFpCustomCanvas;
 			const SourceRect : TRect); override;
 		procedure DoDraw(
 			x         : Integer;
 			y         : Integer;
-			const Img : TFPCustomImage); override;
+			const Img : TFpCustomImage); override;
 	end;
 
-	TWmNewRoom = Class(TFPWebModule)
+	TNewRoomModule = class(TFpWebModule)
 	private
-		FData : String;
-		FId   : String;
+		FData : string;
+		FId   : string;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmNewRoom : TWmNewRoom;
+	NewRoomModule : TNewRoomModule;
 
 implementation
+
 {$R *.lfm}
+
+uses
+	FpWritePng,	
+	FtFont,
+	Base64,
+	IniFiles;
 
 procedure TCanvas.DoCopyRect(
 	x                : Integer;
 	y                : Integer;
-	Canvas           : TFPCustomCanvas;
+	Canvas           : TFpCustomCanvas;
 	const SourceRect : TRect);
 begin
 end;
@@ -62,15 +69,15 @@ end;
 procedure TCanvas.DoDraw(
 	x         : Integer;
 	y         : Integer;
-	const Img : TFPCustomImage);
+	const Img : TFpCustomImage);
 begin
 end;
 
-procedure TWmNewRoom.ReplaceTags(
+procedure TNewRoomModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : string);
 begin
 	case TagString of
 		'CaptchaId'   : ReplaceText := FId;
@@ -78,11 +85,11 @@ begin
 	end
 end;
 
-procedure TWmNewRoom.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
+procedure TNewRoomModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 const
 	CaptchaDir = 'res/captcha/';
 	Chars      = '0123456789abcdefghijklmnopqrstuvwxyz';
@@ -94,11 +101,11 @@ var
 
 procedure GenerateCaptcha;
 var
-	Image       : TFPCustomImage;
+	Image       : TFpCustomImage;
 	Canvas      : TCanvas;
-	Writer      : TFPCustomImageWriter;
+	Writer      : TFpCustomImageWriter;
 	AFont       : TFreeTypeFont;
-	CaptchaText : String;
+	CaptchaText : string;
 	i           : Integer;
 	x           : Integer;
 	y           : Integer;
@@ -107,10 +114,10 @@ var
 	AChar       : Char;
 	AFile       : Text;
 begin
-	Image  := TFPMemoryImage.Create(132, 46);
+	Image  := TFpMemoryImage.Create(132, 46);
 	Canvas := TCanvas.Create(Image);
 
-	FTFont.InitEngine;
+	FtFont.InitEngine;
 	FontMgr.SearchPath := FontPath;
 	AFont := TFreeTypeFont.Create;
 
@@ -140,7 +147,7 @@ begin
 	end;
 
 	Str(Random($FF), FId);
-	Writer := TFPWriterPng.Create;
+	Writer := TFpWriterPng.Create;
 	Image.SaveToFile(CaptchaDir + FId + '.png', Writer);
 
 	FData := '';
@@ -189,9 +196,9 @@ begin
 		AResponse.Content := ModuleTemplate.GetContent
 	end;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('new', TWmNewRoom)
+	RegisterHttpModule('new', TNewRoomModule)
 end.

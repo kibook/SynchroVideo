@@ -1,69 +1,76 @@
 unit WmPlaylist;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmPlaylist = Class(TFPWebModule)
+	TPlaylistModule = class(TFpWebModule)
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean
-		);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmPlaylist : TWmPlaylist;
+	PlaylistModule : TPlaylistModule;
 
 implementation
+
+{$R *.lfm}
+
 uses
 	Classes,
 	SysUtils,
 	Math,
 	IniFiles,
-	FPHttpClient,
+	FpHttpClient,
 	StrUtils,
-	SVUtils;
-
-{$R *.lfm}
+	SvUtils;
 
 var
 	Ini : TIniFile;
 
-function CompareTitles(List : TStringList;
-	Index1, Index2 : Integer) : Integer;
+function CompareTitles(
+	List : TStringList;
+	Index1 : Integer;
+	Index2 : Integer
+) : Integer;
 var
-	t1 : String;
-	t2 : String;
+	t1 : string;
+	t2 : string;
 begin
 	t1 := Ini.ReadString('videos', List[Index1], '???');
 	t2 := Ini.ReadString('videos', List[Index2], '???');
 	CompareTitles := AnsiCompareText(t1, t2)
 end;
 
-procedure TWmPlaylist.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
+procedure TPlaylistModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 const
-	YTAPIURL = 'http://gdata.youtube.com/feeds/api/videos/';
+	YtApiUrl = 'http://gdata.youtube.com/feeds/api/videos/';
 var
-	Room      : String;
-	SessionId : String;
-	HostPass  : String;
+	Room      : string;
+	SessionId : string;
+	HostPass  : string;
 	Secure    : Boolean;
 	Locked    : Boolean;
-	AFile   : Text;
+	AFile     : Text;
 
-function Alert(const s : String) : String;
+function Alert(const Msg : string) : string;
 begin
-	Result := 'alert("'+s+'");'
+	Result := 'alert("' + Msg + '");'
 end;
 
 procedure WriteStatus;
@@ -72,40 +79,15 @@ begin
 		IfThen(Locked, 'true', 'false') + ';'
 end;
 
-function GetPlaylists : TStringList;
+function GetTitle(Id : string) : string;
 var
-	Info   : TSearchRec;
-	faType : Word;
-	Path   : String;
-
-procedure CheckFile;
-begin
-	faType := Info.Attr and faDirectory;
-	if not (faType = faDirectory) then
-		Result.Add(Copy(Info.Name, 1, Length(Info.Name) - 4))
-end;
-
-begin
-	Result := TStringList.Create;
-	Path := 'rooms/'+Room+'/playlists/*';
-	if FindFirst(Path, faAnyFile and faDirectory, Info) = 0 then
-	begin
-		repeat
-			CheckFile
-		until not (FindNext(Info) = 0)
-	end;
-	FindClose(Info)
-end;
-
-function GetTitle(Id : String) : String;
-var
-	Content : String;
+	Content : string;
 	a       : Word;
 	b       : Word;
 begin
-	with TFPHttpClient.Create(Nil) do
+	with TFpHttpClient.Create(Nil) do
 	begin
-		Content := Get(YTAPIURL + Id + '?fields=title');
+		Content := Get(YtApiUrl + Id + '?fields=title');
 		Free
 	end;
 
@@ -116,19 +98,19 @@ end;
 
 procedure WritePlaylists;
 var
-	Video   : String;
-	Content : String;
+	Video   : string;
+	Content : string;
 begin
 	Content := 'Playlists=[';
-	for Video in GetPlaylists do
-		Content := Content + '"'+Video+'",';
+	for Video in GetRoomPlaylists(Room) do
+		Content := Content + '"' + Video + '",';
 	AResponse.Content := Content + '];'
 end;
 
 procedure AddVideo;
 var
-	Id    : String;
-	Title : String;
+	Id    : string;
+	Title : string;
 begin
 	if not Locked or Secure then
 	begin
@@ -145,7 +127,7 @@ end;
 
 procedure DeleteVideo;
 var
-	Id : String;
+	Id : string;
 begin
 	Id := ARequest.QueryFields.Values['id'];
 	Ini.DeleteKey('videos', Id)
@@ -154,7 +136,7 @@ end;
 procedure ClearList;
 var
 	Videos : TStringList;
-	Video  : String;
+	Video  : string;
 begin
 	Videos := TStringList.Create;
 	Ini.ReadSection('videos', Videos);
@@ -167,7 +149,7 @@ procedure ShuffleList;
 var
 	Videos : TStringList;
 	Titles : TStringList;
-	Video  : String;
+	Video  : string;
 	a      : Word;
 	b      : Word;
 	i      : Word;
@@ -229,9 +211,9 @@ procedure SaveList;
 const
 	ValidChars = ['a'..'z', '0'..'9'];
 var
-	FName    : String;
-	ListName : String;
-	Video    : String;	
+	FName    : string;
+	ListName : string;
+	Video    : string;	
 	Ch       : Char;
 	Videos   : TStringList;
 	NewIni   : TIniFile;
@@ -270,9 +252,9 @@ end;
 
 procedure LoadList;
 var
-	FName    : String;
-	ListName : String;
-	Video    : String;
+	FName    : string;
+	ListName : string;
+	Video    : string;
 	Videos   : TStringList;
 	NewIni   : TIniFile;
 begin
@@ -298,14 +280,14 @@ end;
 
 procedure ImportList;
 const
-	YTPLAPIURL = 'http://gdata.youtube.com/feeds/api/playlists/';
+	YtPlApiUrl = 'http://gdata.youtube.com/feeds/api/playlists/';
 	Params     = '?v=2&max-results=50&start-index=';
 var
-	Id       : String;
-	Content  : String;
-	Title    : String;
-	VideoId  : String;
-	Index    : String;
+	Id       : string;
+	Content  : string;
+	Title    : string;
+	VideoId  : string;
+	Index    : string;
 	Requests : Word;
 	a        : Word;
 	b        : Word;
@@ -316,15 +298,15 @@ const
 	Tag    = 'openSearch:totalResults';
 	Params = '?v=2&fields=' + Tag;
 var
-	Content : String;
+	Content : string;
 	a       : Word;
 	b       : Word;
 begin
 	GetListSize := 50;
 
-	with TFPHttpClient.Create(Nil) do
+	with TFpHttpClient.Create(Nil) do
 	begin
-		Content := Get(YTPLAPIURL + Id + Params);
+		Content := Get(YtPlApiUrl + Id + Params);
 		Free
 	end;
 
@@ -337,9 +319,9 @@ procedure ParseList;
 begin
 	Str((50 * i) + 1, Index);
 	
-	with TFPHttpClient.Create(Nil) do
+	with TFpHttpClient.Create(Nil) do
 	begin
-		Content := Get(YTPLAPIURL + Id + Params + Index);
+		Content := Get(YtPlApiUrl + Id + Params + Index);
 		Free
 	end;
 
@@ -381,20 +363,20 @@ end;
 procedure SanitizeList;
 var
 	Videos     : TStringList;
-	Video      : String;
-	Content    : String;
+	Video      : string;
+	Content    : string;
 	Bad        : Boolean = False;
-	HttpClient : TFPHttpClient;
+	HttpClient : TFpHttpClient;
 begin
 	Videos := TStringList.Create;
 	Ini.ReadSection('videos', Videos);
 
-	HttpClient := TFPHttpClient.Create(Nil);
+	HttpClient := TFpHttpClient.Create(Nil);
 
 	for Video in Videos do
 	begin
 		try
-			Content := HttpClient.Get(YTAPIURL + Video)
+			Content := HttpClient.Get(YtApiUrl + Video)
 		except
 			if not (HttpClient.ResponseStatusCode = 404) then
 				Break;
@@ -413,8 +395,8 @@ end;
 
 procedure RemoveList;
 var
-	FName    : String;
-	ListName : String;
+	FName    : string;
+	ListName : string;
 	Ref      : Text;
 begin
 	FName := ARequest.QueryFields.Values['list'];
@@ -427,7 +409,7 @@ end;
 
 procedure ToggleLock(Lock : Boolean);
 var
-	Status : String;
+	Status : string;
 begin
 	Status := IfThen(Lock, 'true', 'false');
 	Ini.WriteString('status', 'locked', Status);
@@ -451,7 +433,7 @@ begin
 	SessionId := XorDecode(HostPass, SessionId);
 	Secure := (SessionId = ARequest.QueryFields.Values['session']);
 
-	Ini := TIniFile.Create('rooms/'+Room+'/playlist.ini');
+	Ini := TIniFile.Create('rooms/' + Room + '/playlist.ini');
 	Ini.CacheUpdates := True;
 
 	Locked := Ini.ReadString('status', 'locked', 'true') = 'true';
@@ -475,9 +457,9 @@ begin
 
 	Ini.Free;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('playlist', TWmPlaylist)
+	RegisterHttpModule('playlist', TPlaylistModule)
 end.

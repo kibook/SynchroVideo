@@ -1,44 +1,51 @@
 unit WmHome;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
 	Classes,
-	SysUtils,
-	inifiles,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmHome = Class(TFPWebModule)
+	THomeModule = class(TFpWebModule)
 	private
 		FRooms : TStringList;
 		FPub   : Integer;
 		FPriv  : Integer;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmHome : TWmHome;
+	HomeModule : THomeModule;
 
 implementation
+
 {$R *.lfm}
 
-procedure TWmHome.ReplaceTags(
+uses
+	SysUtils,
+	IniFiles;
+
+procedure THomeModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : string);
 begin
 	case TagString of
 		'NumRooms'  : ReplaceText := IntToStr(FRooms.Count);
@@ -47,13 +54,13 @@ begin
 	end
 end;
 
-procedure TWmHome.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
+procedure THomeModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 var
-	Room : String;
+	Room : string;
 	Ini  : TIniFile;
 begin
 	FPub := 0;
@@ -65,7 +72,7 @@ begin
 
 	for Room in FRooms do
 	begin
-		Ini := TIniFile.Create('rooms/'+Room+'/settings.ini');
+		Ini := TIniFile.Create('rooms/' + Room + '/settings.ini');
 		if Ini.ReadString('room', 'password', '') = '' then
 			Inc(FPub)
 		else
@@ -81,9 +88,9 @@ begin
 
 	FRooms.Free;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('', TWmHome)
+	RegisterHttpModule('', THomeModule)
 end.

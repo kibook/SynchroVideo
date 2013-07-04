@@ -1,44 +1,51 @@
 unit WmAuth;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
 	Classes,
-	inifiles,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmAuth = Class(TFPWebModule)
+	TAuthModule = class(TFpWebModule)
 	private
-		FRoomName  : String;
-		FRoom      : String;
-		FAccess    : String;
-		FType      : String;
+		FRoomName  : string;
+		FRoom      : string;
+		FAccess    : string;
+		FType      : string;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmAuth : TWmAuth;
+	AuthModule : TAuthModule;
 
 implementation
+
 {$R *.lfm}
 
-procedure TWmAuth.ReplaceTags(
+uses
+	IniFiles;
+
+procedure TAuthModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : string);
 begin
 	case TagString of
 		'RoomName' : ReplaceText := FRoomName;
@@ -48,11 +55,11 @@ begin
 	end
 end;
 
-procedure TWmAuth.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
+procedure TAuthModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 var
 	Ini : TIniFile;
 begin
@@ -60,7 +67,7 @@ begin
 	FAccess := ARequest.QueryFields.Values['access'];
 	FType   := ARequest.QueryFields.Values['type'];
 
-	Ini := TIniFile.Create('rooms/'+FRoom+'/settings.ini');
+	Ini := TIniFile.Create('rooms/' + FRoom + '/settings.ini');
 	FRoomName := Ini.ReadString('room', 'name', '');
 	Ini.Free;
 
@@ -70,9 +77,9 @@ begin
 
 	AResponse.Content := ModuleTemplate.GetContent;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('auth', TWmAuth)
+	RegisterHttpModule('auth', TAuthModule)
 end.

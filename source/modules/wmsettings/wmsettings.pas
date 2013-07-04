@@ -1,35 +1,37 @@
 unit WmSettings;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
 	Classes,
-	SysUtils,
-	inifiles,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmSettings = Class(TFPWebModule)
+	TSettingsModule = class(TFpWebModule)
 	private
-		FRoom        : String;
-		FPassword    : String;
-		FHostPass    : String;
-		FPageTitle   : String;
-		FBanner      : String;
-		FFavicon     : String;
-		FIrcConf     : String;
-		FTags        : String;
-		FDescription : String;
-		FRoomScript  : String;
-		FRoomStyle   : String;
+		FRoom        : string;
+		FPassword    : string;
+		FHostPass    : string;
+		FPageTitle   : string;
+		FBanner      : string;
+		FFavicon     : string;
+		FIrcConf     : string;
+		FTags        : string;
+		FDescription : string;
+		FRoomScript  : string;
+		FRoomStyle   : string;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
 	published
-		procedure DoRequest(
+		procedure Request(
 			Sender     : TObject;
 			ARequest   : TRequest;
 			AResponse  : TResponse;
@@ -37,16 +39,21 @@ type
 	end;
 
 var
-	AWmSettings : TWmSettings;
+	SettingsModule : TSettingsModule;
 
 implementation
+
 {$R *.lfm}
 
-procedure TWmSettings.ReplaceTags(
+uses
+	SysUtils,
+	IniFiles;
+
+procedure TSettingsModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : string);
 begin
 	case TagString of
 		'PageTitle'   : ReplaceText := FPageTitle;
@@ -63,14 +70,14 @@ begin
 	end
 end;
 
-procedure TWmSettings.DoRequest(
+procedure TSettingsModule.Request(
 	Sender     : TObject;
 	ARequest   : TRequest;
 	AResponse  : TResponse;
 	var Handle : Boolean);
 var
 	Ini  : TIniFile;
-	Pass : String;
+	Pass : string;
 begin
 	FRoom := ARequest.QueryFields.Values['room'];
 	
@@ -104,5 +111,5 @@ begin
 end;
 
 initialization
-	RegisterHTTPModule('settings', TWmSettings)
+	RegisterHttpModule('settings', TSettingsModule)
 end.

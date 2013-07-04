@@ -1,54 +1,61 @@
 unit WmConfigure;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
-	IniFiles,
-	SysUtils,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmConfigure = Class(TFPWebModule)
+	TConfigureModule = class(TFpWebModule)
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmConfigure : TWmConfigure;
+	ConfigureModule : TConfigureModule;
 
 implementation
+
 {$R *.lfm}
 
-procedure TWmConfigure.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
+uses
+	SysUtils,
+	IniFiles;
+
+procedure TConfigureModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 var
-	Room        : String;
-	Pass        : String;
-	PageTitle   : String;
-	Banner      : String;
-	Favicon     : String;
-	IrcConf     : String;
-	NewPass     : String;
-	NewHost     : String;
-	Tags        : String;
-	Description : String;
-	RoomScript  : String;
-	RoomStyle   : String;
-	HostPass    : String;
+	Room        : string;
+	Pass        : string;
+	PageTitle   : string;
+	Banner      : string;
+	Favicon     : string;
+	IrcConf     : string;
+	NewPass     : string;
+	NewHost     : string;
+	Tags        : string;
+	Description : string;
+	RoomScript  : string;
+	RoomStyle   : string;
+	HostPass    : string;
 	Ini         : TIniFile;
 
-procedure ThrowError(Err : String);
+procedure ThrowError(Err : string);
 begin
 	AResponse.Contents.LoadFromFile(
-		'templates/pages/error/configure/'+Err+'.htm')
+		'templates/pages/error/configure/' + Err + '.htm')
 end;
 
 procedure ConfigureRoom;
@@ -97,7 +104,7 @@ begin
 	RoomScript  := ARequest.ContentFields.Values['script'];
 	RoomStyle   := ARequest.ContentFields.Values['style'];
 
-	Ini := TIniFile.Create('rooms/'+Room+'/settings.ini');
+	Ini := TIniFile.Create('rooms/' + Room + '/settings.ini');
 	Ini.CacheUpdates := True;
 
 	HostPass := Ini.ReadString('room', 'host-password', '');
@@ -109,9 +116,9 @@ begin
 
 	Ini.Free;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('configure', TWmConfigure)
+	RegisterHttpModule('configure', TConfigureModule)
 end.

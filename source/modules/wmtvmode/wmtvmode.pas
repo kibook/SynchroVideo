@@ -1,52 +1,59 @@
 unit WmTVMode;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
-	IniFiles,
-	Process,
-	StrUtils,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmTVMode = Class(TFPWebModule)
+	TTvModeModule = class(TFpWebModule)
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmTVMode : TWmTVMode;
+	TvModeModule : TTvModeModule;
 
 implementation
+
 {$R *.lfm}
 
-procedure TWmTVMode.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
+uses
+	IniFiles,
+	Process,
+	StrUtils;
+
+procedure TTvModeModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 var
 	Ini       : TIniFile;
-	Room      : String;
-	Id        : String;
-	SessionId : String;
-	HostPass  : String;
+	Room      : string;
+	Id        : string;
+	SessionId : string;
+	HostPass  : string;
 	AFile     : Text;
 	Server    : TProcess;
 begin
 	Room := ARequest.QueryFields.Values['room'];
 	Id   := ARequest.QueryFields.Values['session'];
 
-	Ini := TIniFile.Create('rooms/'+Room+'/settings.ini');
+	Ini := TIniFile.Create('rooms/' + Room + '/settings.ini');
 	HostPass := Ini.ReadString('room', 'host-password', '');
 	Ini.Free;
 
-	AssignFile(AFile, 'rooms/'+Room+'/session.id');
+	AssignFile(AFile, 'rooms/' + Room + '/session.id');
 	Reset(AFile);
 	ReadLn(AFile, SessionId);
 	Close(AFile);
@@ -62,9 +69,9 @@ begin
 		Server.Execute
 	end;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('tvmode', TWmTVMode)
+	RegisterHttpModule('tvmode', TTvModeModule)
 end.

@@ -1,3 +1,3 @@
-object AWmRoom : TWmRoom
-	OnRequest = DoRequest
+object RoomModule : TRoomModule
+	OnRequest = Request
 end

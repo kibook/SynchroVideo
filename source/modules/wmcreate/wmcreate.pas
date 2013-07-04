@@ -1,80 +1,83 @@
 unit WmCreate;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
 	Classes,
-	SysUtils,
-	IniFiles,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmCreate = Class(TFPWebModule)
+	TCreateModule = class(TFpWebModule)
 	private
 		FRoomDir : String;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String
-		);
+			out ReplaceText : string);
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean
-		);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmCreate : TWmCreate;
+	CreateModule : TCreateModule;
 
 implementation
+
 {$R *.lfm}
 
-procedure TWmCreate.ReplaceTags(
+uses
+	SysUtils,
+	IniFiles;
+
+procedure TCreateModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String
-);
+	out ReplaceText : string);
 begin
 	case TagString of
 		'Room' : ReplaceText := FRoomDir
 	end
 end;
 
-procedure TWmCreate.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean
-);
+procedure TCreateModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 const
 	CaptchaDir = 'res/captcha/';
 
 var
 	Rooms    : TStringList;
-	Room     : String;
-	Id       : String;
-	Solve    : String;
-	Pass     : String;
+	Room     : string;
+	Id       : string;
+	Solve    : string;
+	Pass     : string;
 	MaxRooms : Integer;
 	Ini      : TIniFile;
 
-procedure ThrowError(Err : String);
+procedure ThrowError(Err : string);
 begin
 	AResponse.Contents.LoadFromFile(
-		'templates/pages/error/create/'+Err+'.htm')
+		'templates/pages/error/create/' + Err + '.htm')
 end;
 
 procedure CreateRoom;
 const
 	DefVideo = '8tPnX7OPo0Q';
 var
-	Path   : String;
+	Path   : string;
 	NewIni : TIniFile;
 begin
 	Path := 'rooms/' + FRoomDir + '/';
@@ -90,18 +93,19 @@ begin
 	NewIni := TIniFile.Create(Path + 'settings.ini');
 	NewIni.CacheUpdates := True;
 
-	NewIni.WriteString('room', 'name',          Room);
-	NewIni.WriteString('room', 'url',           FRoomDir);
-	NewIni.WriteString('room', 'video',         DefVideo);
-	NewIni.WriteString('room', 'banner',        '');
-	NewIni.WriteString('room', 'irc-settings',  '');
-	NewIni.WriteString('room', 'password',      '');
+	NewIni.WriteString('room', 'name', Room);
+	NewIni.WriteString('room', 'url', FRoomDir);
+	NewIni.WriteString('room', 'video', DefVideo);
+	NewIni.WriteString('room', 'banner', '');
+	NewIni.WriteString('room', 'irc-settings', '');
+	NewIni.WriteString('room', 'password', '');
 	NewIni.WriteString('room', 'host-password', Pass);
-	NewIni.WriteString('room', 'tags',          '');
-	NewIni.WriteString('room', 'description',   '');
-	NewIni.WriteString('room', 'favicon',       '');
-	NewIni.WriteString('room', 'script',        '');
-	NewIni.WriteString('room', 'style',         '');
+	NewIni.WriteString('room', 'tags', '');
+	NewIni.WriteString('room', 'description', '');
+	NewIni.WriteString('room', 'favicon', '');
+	NewIni.WriteString('room', 'script', '');
+	NewIni.WriteString('room', 'style', '');
+
 	NewIni.Free;
 
 	FileCreate(Path + 'syncvid.syn');
@@ -146,9 +150,9 @@ var
 	AFile : Text;
 	Check : String;
 begin
-	if FileExists(CaptchaDir+Id+'.cap') then
+	if FileExists(CaptchaDir + Id + '.cap') then
 	begin
-		AssignFile(AFile, CaptchaDir+Id+'.cap');
+		AssignFile(AFile, CaptchaDir + Id + '.cap');
 		Reset(AFile);
 		ReadLn(AFile, Check);
 		Close(AFile);
@@ -185,17 +189,18 @@ end;
 
 var
 	Allow : Boolean;
-	e     : Word;
-
 begin
 	Ini   := TIniFile.Create('data/rooms.ini');
 	Rooms := TStringList.Create;
 	Ini.ReadSection('rooms', Rooms);
-	Allow := Ini.ReadString('security','allownew','false')='true';
+	Allow := Ini.ReadString('security','allownew','false') = 'true';
 
-	Val(Ini.ReadString('security', 'maxrooms', ''), MaxRooms, e);
-	if not (e = 0) then
-		MaxRooms := 0;
+	try
+		MaxRooms := StrToInt(
+			Ini.ReadString('security', 'maxrooms', '0'))
+	except
+		MaxRooms := 0
+	end;
 	
 	if not Allow then
 		AResponse.Contents.LoadFromFile(
@@ -209,9 +214,9 @@ begin
 		CheckParams
 	end;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('create', TWmCreate)
+	RegisterHttpModule('create', TCreateModule)
 end.

@@ -1,48 +1,51 @@
-unit WmAPI;
+unit WmApi;
+
+{$mode objfpc}
+{$H+}
 
 interface
+
 uses
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmAPI = class(TFPWebModule)
-	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean
-		);
+	TApiModule = class(TFpWebModule)
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmAPI : TWmAPI;
+	ApiModule : TApiModule;
 
 implementation
-uses
-	SysUtils,
-	Classes,
-	IniFiles;
 
 {$R *.lfm}
 
-procedure TWmAPI.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean
-);
+uses
+	SysUtils,
+	Classes,
+	IniFiles,
+	SvUtils;
+
+procedure TApiModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 var
-	Room : String;
+	Room : string;
 
 procedure GetCurrentVideo;
 var
-	BufferFile : String;
-	ListFile   : String;
-	VideoId    : String = '';
-	VideoTitle : String = '';
+	BufferFile : string;
+	ListFile   : string;
+	VideoId    : string = '';
+	VideoTitle : string = '';
 	AFile      : Text;
 	Ini        : TIniFile;
 begin
@@ -64,10 +67,10 @@ begin
 		AResponse.Code := 404
 end;
 
-procedure GetCurrentId;
+procedure GetCurrentID;
 var
-	BufferFile : String;
-	VideoId    : String = '';
+	BufferFile : string;
+	VideoId    : string = '';
 	AFile      : Text;
 begin
 	BufferFile := 'rooms/' + Room + '/syncvid.syn';
@@ -86,7 +89,7 @@ end;
 
 procedure GetPlaylist;
 var
-	ListFile : String;
+	ListFile : string;
 	Videos   : TStringList;
 	i        : Integer;
 	Ini      : TIniFile;
@@ -110,8 +113,8 @@ end;
 
 procedure GetTvMode;
 var
-	BufferFile : String;
-	Line       : String;
+	BufferFile : string;
+	Line       : string;
 	AFile      : Text;
 begin
 	BufferFile := 'rooms/' + Room + '/syncvid.syn';
@@ -136,8 +139,8 @@ end;
 
 procedure GetCurrentTime;
 var
-	BufferFile : String;
-	Line       : String;
+	BufferFile : string;
+	Line       : string;
 	AFile      : Text;
 begin
 	BufferFile := 'rooms/' + Room + '/syncvid.syn';
@@ -158,8 +161,8 @@ end;
 
 procedure GetCurrentStatus;
 var
-	BufferFile : String;
-	Line       : String;
+	BufferFile : string;
+	Line       : string;
 	AFile      : Text;
 begin
 	BufferFile := 'rooms/' + Room + '/syncvid.syn';
@@ -181,31 +184,8 @@ begin
 end;
 
 procedure GetPlaylists;
-var
-	Lists  : TStringList;
-	Info   : TSearchRec;
-	faType : Word;
-	Path   : String;
-
-procedure CheckFile;
 begin
-	faType := Info.Attr and faDirectory;
-	if not (faType = faDirectory) then
-		Lists.Add(Copy(Info.Name, 1, Length(Info.Name) - 4))
-end;
-
-begin
-	Lists := TStringList.Create;
-	Path := 'rooms/' + Room + '/playlists/*';
-	if FindFirst(Path, faAnyFile and faDirectory, Info) = 0 then
-	begin
-		repeat
-			CheckFile
-		until not (FindNext(Info) = 0)
-	end;
-	FindClose(Info);
-
-	AResponse.Contents := Lists
+	AResponse.Contents := GetRoomPlaylists(Room)
 end;
 
 begin
@@ -225,9 +205,9 @@ begin
 		AResponse.Code := 404
 	end;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('api', TWmAPI)
+	RegisterHttpModule('api', TApiModule)
 end.

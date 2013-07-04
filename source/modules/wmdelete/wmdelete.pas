@@ -1,43 +1,51 @@
 unit WmDelete;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
 	Classes,
-	SysUtils,
-	IniFiles,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmDelete = Class(TFPWebModule)
+	TDeleteModule = class(TFpWebModule)
 	private
-		FRoom     : String;
-		FHostPass : String;
+		FRoom     : string;
+		FHostPass : string;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmDelete : TWmDelete;
+	DeleteModule : TDeleteModule;
 
 implementation
+
 {$R *.lfm}
 
-procedure TWmDelete.ReplaceTags(
+uses
+	SysUtils,
+	IniFiles,
+	SvUtils;
+
+procedure TDeleteModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : string);
 begin
 	case TagString of
 		'Room' : ReplaceText := FRoom;
@@ -45,16 +53,16 @@ begin
 	end
 end;
 
-procedure TWmDelete.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
+procedure TDeleteModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 var
 	Confirm : Boolean;
 	IsAuth  : Boolean;
 	Ini     : TIniFile;
-	Pass    : String;
+	Pass    : string;
 
 procedure GetConfirmation;
 begin
@@ -68,34 +76,9 @@ begin
 		'templates/pages/error/delete/deny.htm'
 end;
 
-function GetPlaylists : TStringList;
-var
-	Info   : TSearchRec;
-	faType : Word;
-	Path   : String;
-
-procedure CheckFile;
-begin
-	faType := Info.Attr and faDirectory;
-	if not (faType = faDirectory) then
-		Result.Add(Copy(Info.Name, 1, Length(Info.Name) - 4))
-end;
-
-begin
-	Result := TStringList.Create;
-	Path := 'rooms/'+FRoom+'/playlists/*';
-	if FindFirst(Path, faAnyFile and faDirectory, Info) = 0 then
-	begin
-		repeat
-			CheckFile
-		until not (FindNext(Info) = 0)
-	end;
-	FindClose(Info)
-end;
-
 procedure DeleteRoom;
 var
-	Playlist : String;
+	Playlist : string;
 begin
 	Ini := TIniFile.Create('data/rooms.ini');
 	Ini.CacheUpdates := True;
@@ -103,17 +86,17 @@ begin
 	Ini.DeleteKey('rooms', FRoom);
 	Ini.Free;
 
-	for Playlist in GetPlaylists do
+	for Playlist in GetRoomPlaylists(FRoom) do
 		DeleteFile('rooms/'+FRoom+'/playlists/'+Playlist+'.ini');
 
-	RemoveDir('rooms/'+FRoom+'/playlists/');
+	RemoveDir('rooms/' + FRoom + '/playlists/');
 
-	DeleteFile('rooms/'+FRoom+'/syncvid.syn');
-	DeleteFile('rooms/'+FRoom+'/session.id');
-	DeleteFile('rooms/'+FRoom+'/playlist.ini');
-	DeleteFile('rooms/'+FRoom+'/settings.ini');
+	DeleteFile('rooms/' + FRoom + '/syncvid.syn');
+	DeleteFile('rooms/' + FRoom + '/session.id');
+	DeleteFile('rooms/' + FRoom + '/playlist.ini');
+	DeleteFile('rooms/' + FRoom + '/settings.ini');
 
-	RemoveDir('rooms/'+FRoom+'/');
+	RemoveDir('rooms/' + FRoom + '/');
 
 	ModuleTemplate.FileName := 'templates/pages/delete.htm'
 end;
@@ -125,7 +108,7 @@ begin
 	Confirm   := ARequest.ContentFields.Values['confirm']='true';
 	FHostPass := ARequest.ContentFields.Values['host'];
 
-	Ini := TIniFile.Create('rooms/'+FRoom+'/settings.ini');
+	Ini := TIniFile.Create('rooms/' + FRoom + '/settings.ini');
 	Pass := Ini.ReadString('room', 'host-password', '');
 
 	IsAuth := (FHostPass = Pass) and
@@ -134,7 +117,7 @@ begin
 
 	Ini.Free;
 
-	RoomExists := FileExists('rooms/'+FRoom+'/settings.ini');
+	RoomExists := FileExists('rooms/' + FRoom + '/settings.ini');
 
 	if IsAuth and RoomExists then
 		if not Confirm then
@@ -149,9 +132,9 @@ begin
 
 	AResponse.Content := ModuleTemplate.GetContent;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('delete', TWmDelete)
+	RegisterHttpModule('delete', TDeleteModule)
 end.

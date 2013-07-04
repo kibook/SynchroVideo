@@ -1,23 +1,28 @@
+program TvServer;
+
+{$mode objfpc}
+{$H+}
+
 uses
 	IniFiles,
 	Classes,
 	StrUtils,
 	SysUtils,
-	FPHttpClient;
+	FpHttpClient;
 const
 	BufferFile = 'syncvid.syn';
-	YTAPIURL   = 'http://gdata.youtube.com/feeds/api/videos/';	
+	YtApiUrl   = 'http://gdata.youtube.com/feeds/api/videos/';	
 
-function GetDuration(Id : String) : Double;
+function GetDuration(Id : string) : Double;
 var
-	Content : String;
+	Content : string;
 	a       : Word;
 	b       : Word;
 begin
 	try
-		with TFPHttpClient.Create(NIL) do
+		with TFpHttpClient.Create(NIL) do
 		begin
-			Content := Get(YTAPIURL + Id);
+			Content := Get(YtApiUrl + Id);
 			Free
 		end;
 		a := Pos('<yt:duration seconds=''', Content) + 22;
@@ -33,14 +38,14 @@ var
 	AFile      : Text;
 	Videos     : TStringList;
 	Ini        : TIniFile;
-	Room       : String;
-	SessionKey : String;
-	SessionId  : String;
-	HostPass   : String;
-	VideoId    : String;
-	GetStr     : String;
-	TvMode     : String;
-	Path       : String;
+	Room       : string;
+	SessionKey : string;
+	SessionId  : string;
+	HostPass   : string;
+	VideoId    : string;
+	GetStr     : string;
+	TvMode     : string;
+	Path       : string;
 	Duration   : Double;
 	Time       : Double;
 	Index      : Word;

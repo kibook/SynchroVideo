@@ -1,47 +1,54 @@
 unit WmServer;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
 	Classes,
-	SysUtils,
-	StrUtils,
-	inifiles,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmServer = Class(TFPWebModule)
+	TServerModule = class(TFpWebModule)
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmServer : TWmServer;
+	ServerModule : TServerModule;
 
 implementation
+
 {$R *.lfm}
 
-procedure TWmServer.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
+uses
+	SysUtils,
+	StrUtils,
+	IniFiles;
+
+procedure TServerModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 var
-	Room       : String;
-	SyncTime   : String = '';
-	HostPass   : String;
-	SessionId  : String;
-	BufferFile : String;
-	Content    : String = '';
-	VideoId    : String;
-	Paused     : String;
-	TvMode     : String;
-	Id         : String;
+	Room       : string;
+	SyncTime   : string = '';
+	HostPass   : string;
+	SessionId  : string;
+	BufferFile : string;
+	Content    : string = '';
+	VideoId    : string;
+	Paused     : string;
+	TvMode     : string;
+	Id         : string;
 	Playlist   : TStringList;
 	AFile      : Text;
 	Ini        : TIniFile;
@@ -141,9 +148,9 @@ begin
 	
 	AResponse.Content := Content;
 
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('server', TWmServer)
+	RegisterHttpModule('server', TServerModule)
 end.

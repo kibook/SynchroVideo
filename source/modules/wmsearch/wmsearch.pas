@@ -1,43 +1,50 @@
 unit WmSearch;
 
+{$mode objfpc}
+{$H+}
+
 interface
+
 uses
 	Classes,
-	SysUtils,
-	IniFiles,
-	HTTPDefs,
-	fpHTTP,
-	fpWeb;
+	HttpDefs,
+	FpHttp,
+	FpWeb;
 
 type
-	TWmSearch = Class(TFPWebModule)
+	TSearchModule = class(TFpWebModule)
 	private
-		FSearchTerms   : String;
-		FSearchResults : String;
+		FSearchTerms   : string;
+		FSearchResults : string;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
 	published
-		procedure DoRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AWmSearch : TWmSearch;
+	SearchModule : TSearchModule;
 
 implementation
+
 {$R *.lfm}
 
-procedure TWmSearch.ReplaceTags(
+uses
+	SysUtils,
+	IniFiles;
+
+procedure TSearchModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : string);
 begin
 	case TagString of
 		'SearchTerms'   : ReplaceText := FSearchTerms;
@@ -45,27 +52,28 @@ begin
 	end
 end;
 
-procedure TWmSearch.DoRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
+procedure TSearchModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 var
-	Each     : String;
-	Playing  : String;
-	Password : String;
-	RoomName : String;
-	RoomTags : String;
-	RoomDesc : String;
+	Each     : string;
+	Playing  : string;
+	Password : string;
+	RoomName : string;
+	RoomTags : string;
+	RoomDesc : string;
 	Rooms    : TStringList;
+	Content  : TStringList;
 	Ini      : TIniFile;
 	Match    : Boolean;
 	Priv     : Boolean;
 
-function CheckVideo : String;
+function CheckVideo : string;
 var
 	Playlist   : TIniFile;
-	Id         : String;
+	Id         : string;
 	AFile      : Text;
 begin
 	AssignFile(AFile, 'rooms/'+Each+'/syncvid.syn');
@@ -81,23 +89,14 @@ end;
 procedure DisplayRoom;
 begin
 	if not Priv then
-	begin
-		FSearchResults := FSearchResults +
-			'<h3>'+
-			'<a href="?action=join&room='+Each+'">'+
-				RoomName+'</a>'+
-			'</h3>'#13#10+
-			'<p>'+RoomDesc+'</p>'#13#10+
-			'<p class="smalltext">'#13#10+
-			'<em>Now Playing: <b>'+Playing+'</b></em>'#13#10+
-			'</p>'#13#10;
-	end
+		FSearchResults := FSearchResults + Format(Content.Text,
+			[Each, RoomName, RoomDesc, Playing])
 end;
 
 
 procedure CheckRoom;
 begin
-	Ini := TIniFile.Create('rooms/'+Each+'/settings.ini');
+	Ini := TIniFile.Create('rooms/' + Each + '/settings.ini');
 	Password := Ini.ReadString('room', 'password', '');
 	Priv := Length(Password) > 1;
 
@@ -132,8 +131,14 @@ begin
 		Ini.ReadSection('rooms', Rooms);
 		Ini.Free;
 
+		Content := TStringList.Create;
+		Content.LoadFromFile('templates/html/searchresult.htm');
+
 		for Each in Rooms do
 			CheckRoom;
+
+		Content.Free;
+		Rooms.Free;
 
 		ModuleTemplate.FileName := 'templates/pages/search.htm';
 		ModuleTemplate.AllowTagParams := True;
@@ -142,9 +147,9 @@ begin
 		AResponse.Content := ModuleTemplate.GetContent
 	end;
 	
-	Handle := True
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('search', TWmSearch)
+	RegisterHttpModule('search', TSearchModule)
 end.
