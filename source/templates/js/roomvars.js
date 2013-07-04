@@ -1,4 +1,4 @@
-var SESSIONID = %S;
-var VIDEOID = %S;
-var ROOMNAME = %S;
+var SESSIONID = "%S";
+var VIDEOID = "%S";
+var ROOMNAME = "%S";
 
