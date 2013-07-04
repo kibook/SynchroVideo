@@ -2,11 +2,6 @@ unit WmPlaylist;
 
 interface
 uses
-	Classes,
-	SysUtils,
-	StrUtils,
-	inifiles,
-	fphttpclient,
 	HTTPDefs,
 	fpHTTP,
 	fpWeb;
@@ -18,7 +13,8 @@ type
 			Sender     : TObject;
 			ARequest   : TRequest;
 			AResponse  : TResponse;
-			var Handle : Boolean);
+			var Handle : Boolean
+		);
 	end;
 
 var
@@ -26,8 +22,13 @@ var
 
 implementation
 uses
-	math,
-	svutils;
+	Classes,
+	SysUtils,
+	Math,
+	IniFiles,
+	FPHttpClient,
+	StrUtils,
+	SVUtils;
 
 {$R *.lfm}
 
@@ -377,43 +378,36 @@ begin
 	end
 end;
 
-function GetDuration(Id : String) : Double;
-var
-	Content : String;
-	a       : Word;
-	b       : Word;
-begin
-	try
-		with TFPHttpClient.Create(NIL) do
-		begin
-			Content := Get(YTAPIURL + Id);
-			Free
-		end;
-		a := Pos('<yt:duration seconds=''', Content) + 22;
-		Content := Copy(Content, a, Length(Content));
-		b := Pos('''/>', Content);
-		GetDuration := StrToInt(Copy(Content, 1, b - 1))
-	except
-		GetDuration := 0
-	end
-end;
-
 procedure SanitizeList;
 var
-	Videos : TStringList;
-	Video  : String;
-	Count  : Integer = 0;
+	Videos     : TStringList;
+	Video      : String;
+	Content    : String;
+	Bad        : Boolean = False;
+	HttpClient : TFPHttpClient;
 begin
 	Videos := TStringList.Create;
 	Ini.ReadSection('videos', Videos);
 
-	for Video in Videos do
-		if GetDuration(Video) = 0 then
-		begin
-			Ini.DeleteKey('videos', Video);
-			Inc(Count)
-		end;
+	HttpClient := TFPHttpClient.Create(Nil);
 
+	for Video in Videos do
+	begin
+		try
+			Content := HttpClient.Get(YTAPIURL + Video)
+		except
+			if not (HttpClient.ResponseStatusCode = 404) then
+				Break;
+			Bad := True
+		end;
+		Bad := Bad or
+		      (Pos('reasonCode=''requesterRegion''', Content) > 0);
+		if Bad then
+			Ini.DeleteKey('videos', Video);
+		Sleep(500)
+	end;
+
+	HttpClient.Free;
 	Videos.Free
 end;
 

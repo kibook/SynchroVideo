@@ -21,13 +21,10 @@
 	<tr>
 
 	<td width="50%" id="T1">
-	<object id="movie_container">
-	<param id="movie_params" name="movie"
-		value="http://www.youtube.com/v/{VideoId}?enablejsapi=1&version=3&autoplay=1"></param>
-	<param name="allowFullScreen" value="true"></param>
-	<param name="allowscriptaccess" value="always"</param>
-	<embed src="http://www.youtube.com/v/{VideoId}?enablejsapi=1&version=3&autoplay=1" type="application/x-shockwave-flash" width="640" height="450" allowscriptaccess="always" allowfullscreen="true" id="movie_player"></embed>
-	</object>
+	<iframe id="player" type="text/html" width="640" height="450"
+		src="http://www.youtube.com/embed/{VideoId}?enablejsapi=1&origin=http://synchrovideo.com&autoplay=1"
+		frameborder="0">
+	</iframe>
 	</td>
 
 	<td width="50%" id="T2">

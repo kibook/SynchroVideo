@@ -78,6 +78,11 @@ var btnAddVideo = function() {
 	addVideo(parseUrl($('addvideo').value));
 	$('addvideo').value = '';
 }
+var btnClearPlaylist = function() {
+	var confirmed = confirm("Clear all videos in the playlist?");
+	if (confirmed)
+		clearPlaylist();
+}
 var clearPlaylist = function() {
 	sendCall('playlist', {do: 'clear', session: SESSIONID});
 	sync();
@@ -108,8 +113,18 @@ var savePlaylist = function(list) {
 	});
 }
 var btnSaveList = function() {
-	savePlaylist($('listname').value);
-	$('listname').value = '';
+	var list = $('listname').value;
+	var exists = false;
+	for (var i = 0; i < Playlists.length; i++)
+		if (Playlists[i] == list)
+			exists = true;
+	var confirmed = true;
+	if (exists)
+		confirmed = confirm("Overwrite existing playlist?");
+	if (confirmed) {
+		savePlaylist($('listname').value);
+		$('listname').value = '';
+	}
 }
 var removeList = function(list) {
 	sendCall('playlist', {
@@ -121,8 +136,15 @@ var removeList = function(list) {
 	});
 }
 var btnRemoveList = function() {
-	removeList($('listname').value);
-	$('listname').value = '';
+	var list = $('listname').value;
+	var confirmed = confirm(
+		"Are you sure you want to delete the playlist \"" + list +
+		"\"?");
+	console.log(confirmed);
+	if (confirmed) {
+		removeList(list);
+		$('listname').value = '';
+	}
 }
 var parseListUrl = function(url) {
 	return url.substr(url.indexOf('list=')+5,34);
@@ -161,6 +183,9 @@ var unlockPlaylist = function() {
 		sync();
 	});
 }
+var btnShufflePlaylist = function() {
+	shufflePlaylist();
+}
 var shufflePlaylist = function() {
 	sendCall('playlist', {
 		do: 'shuffle',
@@ -170,6 +195,9 @@ var shufflePlaylist = function() {
 		sync();
 	});
 }
+var btnSortPlaylist = function() {
+	sortPlaylist();
+}
 var sortPlaylist = function() {
 	sendCall('playlist', {
 		do: 'sort',
@@ -178,6 +206,13 @@ var sortPlaylist = function() {
 		checkPlaylist();
 		sync();
 	});
+}
+var btnSanitizePlaylist = function() {
+	var est = Playlist.list.length / 2;
+	var confirmed = confirm("Sanitization will take approximately " +
+		est + " seconds to complete. Sanitize?");
+	if (confirmed)
+		sanitizePlaylist();
 }
 var sanitizePlaylist = function() {
 	$('sanitizewait').style.display = "block";

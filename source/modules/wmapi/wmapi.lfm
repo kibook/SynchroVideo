@@ -1,0 +1,3 @@
+object AWmAPI : TWmAPI
+	OnRequest = DoRequest
+end

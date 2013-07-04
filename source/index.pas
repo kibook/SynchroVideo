@@ -19,7 +19,8 @@ uses
 	WmDelete,
 	WmSettings,
 	WmConfigure,
-	WmTVMode;
+	WmTVMode,
+	WmAPI;
 
 var
 	Ini : TIniFile;
@@ -28,10 +29,10 @@ begin
 
 	Ini := TIniFile.Create('data/info.ini');
 
-	Application.Administrator := Ini.ReadString('info', 'admin',
-		'webmaster');
-	Application.Email := Ini.ReadString('info', 'email',
-		'webmaster@localhost');
+	Application.Administrator :=
+		Ini.ReadString('info', 'admin', 'webmaster');
+	Application.Email :=
+		Ini.ReadString('info', 'email', 'webmaster@localhost');
 
 	Ini.Free;
 

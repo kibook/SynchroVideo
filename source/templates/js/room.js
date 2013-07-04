@@ -108,8 +108,7 @@ var changeBuffer = function() {
 	TIMEBUFFER = parseInt($('bufferselect').value);
 }
 var setVideoSize = function(x,y) {
-	Player.width = x;
-	Player.height = y;
+	Player.setSize(x, y);
 	$('playlistvideos').style.height = (y-24) + 'px';
 	$('chat').width = x;
 }
