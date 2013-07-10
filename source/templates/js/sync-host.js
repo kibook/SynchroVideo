@@ -29,12 +29,12 @@ var sync = function() {
 }
 var syncInit = function() {
 	sendCall('server', {}, function() {
-		updatePlaylist();
 		var synctime = parseInt(SYNCTIME);
 		loadVideo(SYNCVURL);
 		setTimeout(function() {
 			Player.seekTo(synctime);
 			SYNC = setInterval(sync, SYNCDELAY);
+			updatePlaylist();
 		}, 1000);
 		fetchPlaylists();
 	});

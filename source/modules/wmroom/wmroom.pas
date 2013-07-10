@@ -19,6 +19,7 @@ type
 		FBanner      : string;
 		FFavicon     : string;
 		FDescription : string;
+		FTags        : string;
 		FVideoId     : string;
 		FIrcConf     : string;
 		FChannelName : string;
@@ -189,6 +190,7 @@ begin
 		'Banner'       : ReplaceText := GetBanner;
 		'Favicon'      : ReplaceText := FFavicon;
 		'Description'  : ReplaceText := GetDescription;
+		'Tags'         : ReplaceText := FTags;
 		'VideoId'      : ReplaceText := FVideoId;
 		'ChannelName'  : ReplaceText := FChannelName;
 		'IrcConf'      : ReplaceText := FIrcConf;
@@ -246,6 +248,7 @@ begin
 		FBanner      := Ini.ReadString('room','banner', '');
 		FFavicon     := Ini.ReadString('room','favicon', '');
 		FDescription := Ini.ReadString('room','description', '');
+		FTags        := Ini.ReadString('room', 'tags', '');
 		FVideoId     := Ini.ReadString('room','video',  DefVideo);
 		FIrcConf     := Ini.ReadString('room','irc-settings', '');
 		Password     := Ini.ReadString('room','password', '');

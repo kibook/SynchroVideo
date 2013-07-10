@@ -9,13 +9,13 @@ uses
 	Classes;
 
 { format HTML URL encoded strings to plain text }
-function Html2Text  (const RawText : String) : String;
+function Html2Text  (const RawText : string) : string;
 
 { format plain text to HTML-safe encoding }
-function Text2Html  (const RawText : String) : String;
+function Text2Html  (const RawText : string) : string;
 
 { escape incoming data to be web-safe }
-function EscapeText (const RawText : String) : String;
+function EscapeText (const RawText : string) : string;
 
 function GetRoomPlaylists(Room : string) : TStringList;
 
@@ -26,22 +26,22 @@ uses
 	StrUtils;
 
 const
-	HtmlCodes  : array [0..1] of String = (
+	HtmlCodes  : array [0..1] of string = (
 		'+',   #32
 	);
 
-	CleanCodes : array [0..7] of String = (
+	CleanCodes : array [0..7] of string = (
 		'"',  '&quot;',
 		'''', '&#39;',
 		'>',  '&gt;',
 		'<',  '&lt;'
 	);
 
-function ConvertHex(RawText : String) : String;
+function ConvertHex(RawText : string) : string;
 var
 	i    : Integer;
 	Ch   : Char;
-	Code : String;
+	Code : string;
 begin
 	ConvertHex := '';
 	if Length(RawText) > 0 then
@@ -64,8 +64,8 @@ begin
 	end
 end;
 
-function ReplaceText(RawText : String;
-	const List : array of String) : String;
+function ReplaceText(RawText : string;
+	const List : array of string) : string;
 var
 	i : Integer;
 begin
@@ -75,31 +75,35 @@ begin
 			List[i*2+1], [rfReplaceAll]);
 end;
 
-function Html2Text(const RawText : String) : String;
+function Html2Text(const RawText : string) : string;
 begin
 	Html2Text := ReplaceText(ConvertHex(RawText), HtmlCodes)
 end;
 
-function Text2Html(const RawText : String) : String;
+function Text2Html(const RawText : string) : string;
 begin
 	Text2Html := ReplaceText(RawText, CleanCodes)
 end;
 
-function EscapeText(const RawText : String) : String;
+function EscapeText(const RawText : string) : string;
 begin
 	EscapeText := Text2Html(Html2Text(RawText))
 end;
 
 function GetRoomPlaylists(Room : string) : TStringList;
 var
-	Info : TSearchRec;
+	Info      : TSearchRec;
+	Ext       : string;
+	Name      : string;
 begin
 	Result := TStringList.Create;
 	FindFirst('rooms/' + Room + '/playlists/*', faAnyFile, Info);
 	repeat
-		if not (Info.Attr = faDirectory) then
-			Result.Add(Copy(Info.Name, 1,
-				Length(Info.Name) - 4))
+		Name := Copy(Info.Name, 1, Pos('.', Info.Name) - 1);
+		Ext  := Copy(Info.Name,
+			Pos('.', Info.Name) + 1, Length(Info.Name));
+		if Ext = 'ini' then
+			Result.Add(Name)
 	until not (FindNext(Info) = 0)
 end;
 

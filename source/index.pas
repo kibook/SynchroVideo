@@ -1,7 +1,5 @@
 uses
-	fpCGI,
-	HTTPDefs,
-	fpHTTP,
+	FpCgi,
 
 	IniFiles,
 

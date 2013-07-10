@@ -87,6 +87,31 @@ begin
 		AResponse.Code := 404
 end;
 
+procedure GetSavedPlaylist;
+var
+	ListFile : string;
+	Videos   : TStringList;
+	i        : Integer;
+	Ini      : TIniFile;
+begin
+	ListFile := ARequest.QueryFields.Values['list'];
+	ListFile := 'rooms/' + Room + '/playlists/' + ListFile + '.ini';
+
+	if FileExists(ListFile) then
+	begin
+		Ini := TIniFile.Create(ListFile);
+		Videos := TStringList.Create;
+		Ini.ReadSection('videos', Videos);
+		for i := 0 to Videos.Count - 1 do
+			Videos[i] := Ini.ReadString('videos',Videos[i], '');
+		Ini.Free;
+		AResponse.Contents := Videos;
+		Videos.Free
+	end
+	else
+		AResponse.Code := 404
+end;
+
 procedure GetPlaylist;
 var
 	ListFile : string;
@@ -200,7 +225,8 @@ begin
 		'currentstatus' : GetCurrentStatus;
 		'playlist'      : GetPlaylist;
 		'tvmode'        : GetTvMode;
-		'playlists'     : GetPlaylists
+		'playlists'     : GetPlaylists;
+		'savedlist'     : GetSavedPlaylist
 	else
 		AResponse.Code := 404
 	end;

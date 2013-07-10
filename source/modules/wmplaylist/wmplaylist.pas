@@ -226,6 +226,9 @@ begin
 	for Ch in LowerCase(FName) do
 		if Ch in ValidChars then
 			ListName := ListName + Ch;
+
+	if ListName = '' then
+		ListName := 'unnamed';
 	
 	ListName := ListName + '.ini';
 
