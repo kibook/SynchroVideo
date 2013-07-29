@@ -1,3 +1,0 @@
-object ListModule : TListModule
-	OnRequest = Request
-end
