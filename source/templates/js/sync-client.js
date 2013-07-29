@@ -24,6 +24,9 @@ var sync = function() {
 }
 var syncInit = function() {
 	SYNC = setInterval(sync, SYNCDELAY);
+	setTimeout(function() {
+		updatePlaylist(true);
+	});
 }
 var updatePlaylist = function() {
 	if (SYNCSVTV == '1')
@@ -33,9 +36,10 @@ var updatePlaylist = function() {
 
 	var same = true;
 	try {	
-		same = (CPlaylist.index==Playlist.index)&&
-			(CPlaylist.locked==Playlist.locked)&&
-			(CPlaylist.list.length==Playlist.list.length);
+		same = (CPlaylist.index==Playlist.index) &&
+			(CPlaylist.locked==Playlist.locked) &&
+			(CPlaylist.list.length==Playlist.list.length) &&
+			(force != true);
 		if (same)
 			for (var i = 0; i < Playlist.list.length; i++)
 				same=same&&(CPlaylist.list[i].id==

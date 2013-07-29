@@ -4,8 +4,8 @@ all:
 	make clean
 
 build:
-	$(FPC) index.pas -oindex.cgi -Fumodules/* -Fuunits/
-	$(FPC) bin/tvserver.pas -obin/tvserver
+	$(FPC) index.pp -oindex.cgi -Fumodules/* -Fuunits/
+	$(FPC) bin/tvserver.pp -obin/tvserver
 
 clean:
 	rm *.o *.or */*.o */*.ppu */*/*.o */*/*.ppu
