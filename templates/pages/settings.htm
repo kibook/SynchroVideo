@@ -1,0 +1,63 @@
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/css"
+		href="templates/css/general.css">
+	
+	<title>{PageTitle} Configuration</title>
+</head>
+
+<body>
+	<center>
+	<h1>Settings</h1>
+	<form name="form" action="?action=configure"
+		method="POST" enctype="multipart/form-data">
+	<input type="hidden" name="host" value="{HostPass}">
+	<input type="hidden" name="room" value="{Room}">
+	<table cellpadding="5">
+	<tr>
+	<td>Room Title:</td>
+	<td><input type="text" name="title" value="{PageTitle}"></td>
+	</tr><tr>
+	<td>Banner:</td>
+	<td><input type="text" name="banner" value="{Banner}"></td>
+	</tr><tr>
+	<td>Favicon:</td>
+	<td><input type="text" name="favicon" value="{Favicon}"></td>
+	</tr><tr>
+	<td>IRC Settings:</td>
+	<td><input type="text" name="ircconf" value="{IrcConf}"></td>
+	</tr><tr>
+	<td>Password:</td>
+	<td><input type="text" name="newpass" value="{Password}"></td>
+	</tr><tr>
+	<td>Host Password:</td>
+	<td><input type="text" name="newhost" value="{HostPass}"></td>
+	</tr><tr>
+	<td>Room tags:</td>
+	<td><input type="text" name="tags" value="{Tags}"></td>
+	</tr><tr>
+	<td>Description:</td>
+	<td><input type="text" name="desc" value="{Description}"></td>
+	</tr><tr>
+	<td>Custom script:</td>
+	<td><input type="text" name="script" value="{RoomScript}"></td>
+	</tr><tr>
+	<td>Custom style:</td>
+	<td><input type="text" name="style" value="{RoomStyle}"></td>
+	</tr>
+	</table>
+	<input type="submit" value="Save Changes">
+	</form>
+	<br><br>
+	<form action="?action=delete" method="POST"
+		enctype="multipart/form-data">
+	<input type="hidden" name="room" value="{Room}">
+	<input type="hidden" name="host" value="{HostPass}">
+	<input type="hidden" name="confirm" value="false">
+	<input type="submit" value="Delete Room">
+	</form>
+	</center>
+</body>
+
+</html>

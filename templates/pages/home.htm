@@ -1,0 +1,51 @@
+<html>
+
+<head>
+	<title>SynchroVideo</title>
+	<link rel="stylesheet" type="text/css"
+		href="templates/css/general.css">
+	<link rel="stylesheet" type="text/css"
+		href="templates/css/index.css">
+	<link rel="icon" href="templates/res/favicon.gif">
+</head>
+
+<body>
+	<div class="header">
+	<img src="templates/res/logo.png" alt="SynchroVideo">
+	</div>
+
+	<hr width="50%" noshade>
+
+	<center>
+	<table cellpadding="10" cellspacing="10">
+	<tr>
+	<td class="link"><a href="?action=info">Information</a></td>
+	<td class="link"><a href="?action=new">Create Room</a></td>
+	<td class="link"><a href="https://github.com/kibook/SynchroVideo" target="_blank">View Source</a></td>
+	</tr>
+	</table>
+	</center>
+
+	<div class="section">
+	<h2><u>Welcome to SynchroVideo!</u></h2>
+
+	<div class="subsection">
+	<p>Now Serving {NumRooms} rooms!</p>
+	<p>({PubRooms} public and {PrivRooms} private)</p>
+	</div>
+	</div>
+
+	<div class="section">
+	<h3>Search for rooms:</h3>
+	<form action="./" method="GET">
+	<input type="hidden" name="action" value="search">
+	<p><input type="text" size="30" name="q"></p>
+	<p><input type="submit" value="Search"></p>
+	</form>
+	<div class="subsection">
+	<a href="?action=list">Full Room List</a>
+	</div>
+	</div>
+</body>
+
+</html>

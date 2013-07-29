@@ -1,0 +1,3 @@
+object AuthModule: TAuthModule
+  OnRequest = Request
+end

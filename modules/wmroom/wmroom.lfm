@@ -1,0 +1,3 @@
+object RoomModule: TRoomModule
+  OnRequest = Request
+end

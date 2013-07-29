@@ -1,0 +1,19 @@
+<table>
+<tr>
+<td>List:</td>
+<td><input type="text" id="listname"></td>
+<td><select id="playlists" onchange="selectPlaylist();">
+<option value="">--none--</option>
+</select></td>
+</tr>
+</table>
+<table>
+<tr>
+<td><input type="button" onclick="btnLoadList();" value="Load"></td>
+<td><input type="button" onclick="btnSaveList();" value="Save"></td>
+<td><input type="button" onclick="btnRemoveList();" value="Delete"></td>
+<td><input type="button" onclick="btnImportList();" value="Import"></td>
+</tr>
+</table>
+<div id="importwait">Importing playlist...</div>
+<br>

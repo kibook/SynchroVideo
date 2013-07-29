@@ -1,0 +1,3 @@
+object SearchModule: TSearchModule
+  OnRequest = Request
+end

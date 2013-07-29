@@ -1,0 +1,3 @@
+object ConfigureModule: TConfigureModule
+  OnRequest = Request
+end

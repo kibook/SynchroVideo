@@ -1,0 +1,26 @@
+div.header {
+  padding: 20px;
+  background-color: #aaa;
+  text-align: center;
+}
+div.footer {
+  margin-top: 40%;
+  text-align: center;
+}
+div.section {
+  text-align: center;
+}
+td.link {
+}
+td.link a {
+  color: #a10;
+}
+div.section h3 {
+  color: #a10;
+}
+div.section div.subsection {
+  font-size: 13px;
+}
+hr {
+  border-color: #444;
+}

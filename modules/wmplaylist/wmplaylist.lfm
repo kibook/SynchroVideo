@@ -1,0 +1,3 @@
+object PlaylistModule: TPlaylistModule
+  OnRequest = Request
+end

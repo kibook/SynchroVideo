@@ -1,0 +1,3 @@
+object DeleteModule: TDeleteModule
+  OnRequest = Request
+end

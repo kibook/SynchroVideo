@@ -1,0 +1,3 @@
+object HomeModule: THomeModule
+  OnRequest = Request
+end
