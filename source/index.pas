@@ -1,40 +1,42 @@
+program SynchroVideo;
+
+{$mode objfpc}{$h+}
+
 uses
-	FpCgi,
+  FpCgi,
 
-	IniFiles,
+  IniFiles,
 
-	{ Modules }
-	WmHome,
-	WmRoom,
-	WmAuth,
-	WmInfo,
-	WmPlaylist,
-	WmServer,
-	WmSearch,
-	WmList,
-	WmNewRoom,
-	WmCreate,
-	WmDelete,
-	WmSettings,
-	WmConfigure,
-	WmTVMode,
-	WmAPI;
+  { Modules }
+  WmHome,
+  WmRoom,
+  WmAuth,
+  WmInfo,
+  WmPlaylist,
+  WmServer,
+  WmSearch,
+  WmList,
+  WmNewRoom,
+  WmCreate,
+  WmDelete,
+  WmSettings,
+  WmConfigure,
+  WmTVMode,
+  WmApi;
 
 var
-	Ini : TIniFile;
+  Ini : TIniFile;
 begin
-	Application.Initialize;
+  Application.Initialize;
 
-	Ini := TIniFile.Create('data/info.ini');
+  Ini := TIniFile.Create('data/info.ini');
 
-	Application.Administrator :=
-		Ini.ReadString('info', 'admin', 'webmaster');
-	Application.Email :=
-		Ini.ReadString('info', 'email', 'webmaster@localhost');
+  Application.Administrator := Ini.ReadString('info', 'admin', '');
+  Application.Email := Ini.ReadString('info', 'email', '');
 
-	Ini.Free;
+  Ini.Free;
 
-	Application.ModuleVariable := 'action';
+  Application.ModuleVariable := 'action';
 
-	Application.Run
+  Application.Run
 end.

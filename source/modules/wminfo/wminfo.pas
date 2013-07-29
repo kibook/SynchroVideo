@@ -1,43 +1,40 @@
 unit WmInfo;
 
-{$mode objfpc}
-{$H+}
+{$mode objfpc}{$h+}{$r *.lfm}
 
 interface
 
 uses
-	HttpDefs,
-	FpHttp,
-	FpWeb;
+  HttpDefs,
+  FpHttp,
+  FpWeb;
 
 type
-	TInfoModule = class(TFpWebModule)
-	published
-		procedure Request(
-			Sender      : TObject;
-			ARequest    : TRequest;
-			AResponse   : TResponse;
-			var Handled : Boolean);
-	end;
+  TInfoModule = class(TFpWebModule)
+  published
+    procedure Request(
+      Sender      : TObject;
+      ARequest    : TRequest;
+      AResponse   : TResponse;
+      var Handled : Boolean);
+  end;
 
 var
-	InfoModule : TInfoModule;
+  InfoModule : TInfoModule;
 
 implementation
 
-{$R *.lfm}
-
 procedure TInfoModule.Request(
-	Sender      : TObject;
-	ARequest    : TRequest;
-	AResponse   : TResponse;
-	var Handled : Boolean);
+  Sender      : TObject;
+  ARequest    : TRequest;
+  AResponse   : TResponse;
+  var Handled : Boolean);
 begin
-	AResponse.Contents.LoadFromFile('templates/pages/info.htm');
-	
-	Handled := True
+  AResponse.Contents.LoadFromFile('templates/pages/info.htm');
+  
+  Handled := True
 end;
 
 initialization
-	RegisterHttpModule('info', TInfoModule)
+  RegisterHttpModule('info', TInfoModule)
 end.

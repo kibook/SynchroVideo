@@ -34,6 +34,7 @@ var syncInit = function() {
 		setTimeout(function() {
 			Player.seekTo(synctime);
 			SYNC = setInterval(sync, SYNCDELAY);
+			SYNCSVTV = "0";
 			updatePlaylist();
 		}, 1000);
 		fetchPlaylists();
@@ -244,7 +245,7 @@ var fetchPlaylists = function() {
 var selectPlaylist = function() {
 	$('listname').value = $('playlists').value;
 }
-var updatePlaylist = function() {
+var updatePlaylist = function(force) {
 	if (SYNCSVTV == '1')
 		$('tvmode').innerHTML = '(tvmode on)';
 	else
@@ -252,9 +253,10 @@ var updatePlaylist = function() {
 
 	var same = true;
 	try {	
-		same = (CPlaylist.index==Playlist.index)&&
-			(CPlaylist.locked==Playlist.locked)&&
-			(CPlaylist.list.length==Playlist.list.length);
+		same = (CPlaylist.index==Playlist.index) &&
+			(CPlaylist.locked==Playlist.locked) &&
+			(CPlaylist.list.length==Playlist.list.length) &&
+			(force != true);
 		if (same)
 			for (var i = 0; i < Playlist.list.length; i++)
 				same=same&&(CPlaylist.list[i].id==

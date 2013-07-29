@@ -57,7 +57,7 @@ var sendCall = function(action, params, f) {
 		paramList = paramList + '&' + param + '=' + params[param];
 	var n = document.createElement("script");
 	n.type = "text/javascript";
-	n.src  = '?action=' + action + '&room=' + ROOMNAME + paramList;
+	n.src  = '/?action=' + action + '&room=' + ROOMNAME + paramList;
 	n.id   = 'synccall';
 	n.onload = function() {
 		document.body.removeChild(this);
