@@ -17,19 +17,24 @@
 	<input type="hidden" name="id" value="{CaptchaId}">
 	<p><b>CAPTCHA:</b></p>
 	<p><img src="data:image/png;base64,{CaptchaData}"></p>
-	<p class="smalltext">Type in the letters and number above:</p>
+	<p class="smalltext">Type in the letters and numbers above:</p>
 	<p><input type="text" name="solve"></p>
 	<table cellpadding="2">
-	<tr>
+	<tr title="Room name must consist of 5-16 alphanumeric characters.">
 	<td>Room Name:</td>
 	<td><input type="text" name="room"></td>
-	</tr><tr>
+	</tr><tr
+    title="This password will be used to take host and edit room settings.">
 	<td>Host Password:</td>
 	<td><input type="password" name="pass"></td>
 	</tr><tr>
-	<td><input type="button" value="Reset"
-		onclick="location.reload(true);"></td>
-	<td><input type="submit"></td>
+	<td>
+    <button class="bigbtn" type="button"
+		  onclick="location.reload(true);">
+        Reset
+    </button>
+  </td>
+	<td><button class="bigbtn" type="submit">Create Room</button></td>
 	</tr>
 	</table>
 	</form>

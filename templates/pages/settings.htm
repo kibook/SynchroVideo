@@ -29,10 +29,10 @@
 	<td><input type="text" name="ircconf" value="{IrcConf}"></td>
 	</tr><tr>
 	<td>Password:</td>
-	<td><input type="text" name="newpass" value="{Password}"></td>
+	<td><input type="password" name="newpass" value="{Password}"></td>
 	</tr><tr>
 	<td>Host Password:</td>
-	<td><input type="text" name="newhost" value="{HostPass}"></td>
+	<td><input type="password" name="newhost" value="{HostPass}"></td>
 	</tr><tr>
 	<td>Room tags:</td>
 	<td><input type="text" name="tags" value="{Tags}"></td>
@@ -47,7 +47,7 @@
 	<td><input type="text" name="style" value="{RoomStyle}"></td>
 	</tr>
 	</table>
-	<input type="submit" value="Save Changes">
+  <button class="bigbtn" type="submit">Save Changes</button>
 	</form>
 	<br><br>
 	<form action="?action=delete" method="POST"
@@ -55,7 +55,7 @@
 	<input type="hidden" name="room" value="{Room}">
 	<input type="hidden" name="host" value="{HostPass}">
 	<input type="hidden" name="confirm" value="false">
-	<input type="submit" value="Delete Room">
+  <button class="bigbtn" type="submit">Delete Room</button>
 	</form>
 	</center>
 </body>

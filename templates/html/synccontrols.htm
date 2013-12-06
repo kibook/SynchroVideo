@@ -1,6 +1,11 @@
+<span id="sync_controls"
+  title="When this is checked, your video is kept in sync with the host">
 Synchronize:&nbsp;
 <input type="checkbox" id="syncselect" onchange="changeSync();" checked>
 &nbsp;
+</span>
+<span id="time_buffer"
+  title="Increase this value if your video appears to jump often">
 Time Buffer&nbsp;
 <select id="bufferselect" onchange="changeBuffer();">
 <option value="1.0" selected="selected">1 sec</option>
@@ -9,3 +14,4 @@ Time Buffer&nbsp;
 <option value="10.0">10 secs</option>
 <option value="20.0">20 secs</option>
 </select>&nbsp;
+</span>

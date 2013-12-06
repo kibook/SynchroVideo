@@ -23,8 +23,9 @@
 
 	<td width="600px" id="T1">
 	<iframe id="player" type="text/html" width="640" height="450"
-		src="http://www.youtube.com/embed/{VideoId}?enablejsapi=1&origin=http://synchrovideo.com&autoplay=1"
-		frameborder="0">
+		src="http://www.youtube.com/embed/{VideoId}?enablejsapi=1&origin=http://synchrovideo.com&autoplay=1&fs=1"
+		frameborder="0"
+    webkitallowfullscreen mozallowfullscreen allowfullscreen>
 	</iframe>
 	</td>
 
@@ -37,7 +38,7 @@
 	</tr><tr>
 
 	<td width="600px" id="T3">
-	<iframe width="640" height="330" scrolling="no" frameborder="0" id="chat" src="http://widget.mibbit.com/?server=kibj.foxlan.ru&channel=%23ritathefox&nick=unnamed%3F%3F"></iframe>
+	<iframe width="640" height="330" scrolling="no" frameborder="0" id="chat" src="http://widget.mibbit.com/?server=kibj.foxlan.ru&channel=%23{ChannelName}&nick=unnamed%3F%3F"></iframe>
 	</td>
 
 	<td width="600px" id="T4">
@@ -51,9 +52,8 @@
 
 	<table>
 	<tr>
-	<td>Add:</td>
 	<td><input type="text" id="addvideo"></td>
-	<td><input type="button" onclick="btnAddVideo();" value="Add"></td>
+  <td><button type="button" onclick="btnAddVideo();">Add</button></td>
 	</tr>
 	</table>
 
@@ -73,13 +73,18 @@
 	<h3>Settings</h3>
 	<p>
 
+  <span id="video_size"
+    title="Change the size of the video player.">
 	Video Size:&nbsp;
 	<select id="videosize" onchange="changeVideoSize();">
 	<option value="small">small</option>
 	<option value="normal" selected="selected">normal</option>
 	<option value="large">large</option>
 	</select>&nbsp;
+  </span>
 
+  <span id="room_layout"
+    title="Change the layout of the room.">
 	Layout:&nbsp;
 	<select id="layouts" onchange="changeLayout();">
 	<option id="default" value="default">Default</option>
@@ -88,9 +93,12 @@
 	<option id="no-chat" value="no-chat">No Chat</option>
 	<option id="mirror" value="mirror">Mirror</option>
 	</select>&nbsp;
+  </span>
 
 	{SyncControls}
 
+  <span id="sync_interval"
+    title="How often your client synchronises with the server">
 	Sync Interval&nbsp;
 	<select id="delayselect" onchange="changeDelay();">
 	<option value="500">0.5 secs</option>
@@ -98,12 +106,13 @@
 	<option value="1500">1.5 secs</option>
 	<option value="2000">2.0 secs</option>
 	</select>&nbsp;
+  </span>
 
 	{TakeHost}
 
 	</p>
 
-	<p>{SettingsLink}</p>
+	<p title="Configure room settings.">{SettingsLink}</p>
 
 	</center>
 

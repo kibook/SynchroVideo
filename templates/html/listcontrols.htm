@@ -1,18 +1,23 @@
+<p class="smalltext">List Control:</p>
 <table>
 <tr>
-<td>List:</td>
 <td><input type="text" id="listname"></td>
-<td><select id="playlists" onchange="selectPlaylist();">
+<td title="Select a saved playlist.">
+  <select id="playlists" onchange="selectPlaylist();">
 <option value="">--none--</option>
 </select></td>
 </tr>
 </table>
 <table>
 <tr>
-<td><input type="button" onclick="btnLoadList();" value="Load"></td>
-<td><input type="button" onclick="btnSaveList();" value="Save"></td>
-<td><input type="button" onclick="btnRemoveList();" value="Delete"></td>
-<td><input type="button" onclick="btnImportList();" value="Import"></td>
+<td title="Load a saved playlist.">
+  <button type="button" onclick="btnLoadList();">Load</button></td>
+<td title="Save the current playlist under the title in the box above.">
+  <button type="button" onclick="btnSaveList();">Save</button></td>
+<td title="Delete the specified playlist.">
+  <button type="button" onclick="btnRemoveList();">Delete</button></td>
+<td title="Import a YouTube playlist URL.">
+  <button type="button" onclick="btnImportList();">Import</button></td>
 </tr>
 </table>
 <div id="importwait">Importing playlist...</div>

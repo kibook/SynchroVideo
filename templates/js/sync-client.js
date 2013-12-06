@@ -18,7 +18,7 @@ var sync = function() {
 			Player.playVideo();
 		if (Math.abs(synctime-time) > TIMEBUFFER)
 			Player.seekTo(synctime);
-		if (videourl != SYNCVURL)
+		if (videourl != SYNCVURL && SYNCVURL != '')
 			loadVideo(SYNCVURL);
 	});
 }
@@ -26,7 +26,32 @@ var syncInit = function() {
 	SYNC = setInterval(sync, SYNCDELAY);
 	setTimeout(function() {
 		updatePlaylist(true);
-	});
+	}, 0);
+    setTimeout(function() {
+        autoTimeBuffer();
+    }, 5000);
+}
+var getPing = function() {
+    var ping = Date.now();
+    var req = new XMLHttpRequest();
+    req.open("GET", "/", false);
+    req.send();
+    ping = Date.now() - ping;
+    console.log("PING: " + ping);
+    return ping;
+}
+var autoTimeBuffer = function() {
+    var ping1 = getPing();
+    var ping2 = getPing();
+    var ping3 = getPing();
+    var ping = Math.floor(ping1 + ping2 + ping3) / 3;
+    var buf = $("bufferselect");
+    var n = buf.children.length;
+    for (var i = 0; i < n; i++)
+        buf.children[i].selected = "";
+    var sel = Math.min(Math.floor(ping / 300), n - 1);
+    buf.children[sel].selected = "selected";
+    changeBuffer();
 }
 var updatePlaylist = function() {
 	if (SYNCSVTV == '1')
@@ -97,10 +122,10 @@ var updatePlaylist = function() {
 	CPlaylist.list = Playlist.list;
 }
 var addVideo = function(id) {
-	sendCall('playlist', {do: 'status'}, function() {
+	sendCall('playlist', {'do': 'status'}, function() {
 		if (!Playlist.locked) {
 			$('addwait').style.display = "block";
-			sendCall('playlist',{do:'add',id:id},function() {
+			sendCall('playlist',{'do':'add',id:id},function() {
 				setTimeout(function() {
 					$('addwait').style.display="none";
 				}, 2000);

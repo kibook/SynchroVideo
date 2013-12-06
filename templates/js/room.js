@@ -67,7 +67,7 @@ var sendCall = function(action, params, f) {
 	document.body.appendChild(n);
 }
 var checkPlaylist = function() {
-	sendCall('playlist', {do: 'status'});
+	sendCall('playlist', {'do': 'status'});
 }
 var getVideoIndex = function(id) {
 	var pl = Playlist.list;

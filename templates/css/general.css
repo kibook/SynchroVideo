@@ -14,3 +14,11 @@ a:hover, td.link a:hover {
 p.smalltext {
 	font-size: 13px;
 }
+button {
+    height: 26;
+    width: 75;
+}
+button.bigbtn {
+    height: 26;
+    width: auto;
+}

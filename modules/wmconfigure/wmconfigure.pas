@@ -83,6 +83,8 @@ begin
 
   if not NameCheck then
     ThrowError('badname')
+  else if NewHost = '' then
+    ThrowError('password')
   else
     ConfigureRoom
 end;

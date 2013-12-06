@@ -1,23 +1,31 @@
 <table cellpadding="5">
 <tr>
-<td class="btn"><input type="button" value="Clear"
-	onclick="btnClearPlaylist();"></td>
-<td class="btn"><input type="button" value="Lock"
-	onclick="lockPlaylist();"></td>
-<td class="btn"><input type="button" value="Unlock"
-	onclick="unlockPlaylist();"></td>
+<td class="btn" title="Clear current playlist.">
+  <button type="button" onclick="btnClearPlaylist();">
+  Clear</button></td>
+<td class="btn" title="Lock playlist, only host may add videos.">
+  <button type="button" onclick="lockPlaylist();">
+  Lock</button></td>
+<td class="btn" title="Unlock playlist, anyone may add videos.">
+  <button type="button" onclick="unlockPlaylist();">
+  Unlock</button></td>
 </tr><tr>
-<td class="btn"><input type="button" value="Shuffle"
-	onclick="btnShufflePlaylist();"></td>
-<td class="btn"><input type="button" value="Random"
-	onclick="playRandom();"></td>
-<td class="btn"><input type="button" value="Sort"
-	onclick="btnSortPlaylist();"></td>
+<td class="btn" title="Shuffle current playlist videos randomly.">
+  <button type="button" onclick="btnShufflePlaylist();">
+  Shuffle</button></td>
+<td class="btn" title="Play a random video from the current playlist.">
+  <button type="button" onclick="playRandom();">
+  Random</button></td>
+<td class="btn" title="Sort the current playlist alphabetically.">
+  <button type="button" onclick="btnSortPlaylist();">
+  Sort</button></td>
 </tr><tr>
-<td class="btn"><input type="button" value="Sanitize"
-	onclick="btnSanitizePlaylist();"></td>
-<td class="btn"><input type="button" value="TV Mode"
-	onclick="startTvMode();"></td>
+<td class="btn" title="Remove broken videos.">
+  <button type="button" onclick="btnSanitizePlaylist();">
+  Sanitize</button></td>
+<td class="btn" title="Put room into TV Mode.">
+  <button class="bigbtn" type="button" onclick="startTvMode();">
+  TV Mode</button></td>
 <td></td>
 </tr>
 </table>

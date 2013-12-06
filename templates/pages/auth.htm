@@ -6,7 +6,7 @@
 		href="templates/css/general.css">
 </head>
 
-<body onload="document.form.host.focus()">
+<body onload="document.getElementById('password').focus()">
 	<center>
 	<table cellpadding="10"><tr>
 	<td><a href="?action=join&room={Room}">&lt;- Back</a></td>	
@@ -16,8 +16,8 @@
 	<form name="form" action="?action={Access}&room={Room}"
 		method="POST" enctype="multipart/form-data">
 	Password:<br>
-	<input type="password" name="{Type}"><br>
-	<input type="submit">
+	<p><input type="password" id="password" name="{Type}"></p>
+	<button type="submit">Submit</button>
 	</form>
 	</center>
 </body>

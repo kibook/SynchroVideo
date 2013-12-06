@@ -108,8 +108,7 @@ begin
     SetSync
   else
     Content := Content + 'window.location="'+
-      '?action=join&room='+Room+'";'+
-      'alert("You are no longer host!");'
+      '?action=join&room='+Room+'";'
 end;
 
 begin

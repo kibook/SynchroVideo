@@ -173,9 +173,9 @@ begin
   Room  := ARequest.ContentFields.Values['room'];
   Pass  := ARequest.ContentFields.Values['pass'];
 
-  ParamCheck := not (Id = '')    and
-                not (Solve = '') and
-                not (Room = '')  and
+  ParamCheck := not (Id = '')    or
+                not (Solve = '') or
+                not (Room = '')  or
                 not (Pass = '');
 
   if ParamCheck then
